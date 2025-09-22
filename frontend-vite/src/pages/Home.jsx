@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import api from '../lib/api'
 
 export default function Home() {
@@ -8,7 +9,16 @@ export default function Home() {
 	}, [])
 	return (
 		<div className="container mx-auto px-4 py-8">
-			<h1 className="text-3xl font-bold mb-6">Discover</h1>
+			<h1 className="text-3xl font-bold mb-3">Discover</h1>
+			<div className="mb-4">
+				<div className="row g-2">
+					{['Sydney','Melbourne','Brisbane','Perth','Adelaide','Canberra'].map(c => (
+						<div className="col-6 col-md-2" key={c}>
+							<Link to={`/city/${c}`} className="btn btn-outline-secondary w-100">{c}</Link>
+						</div>
+					))}
+				</div>
+			</div>
 			<Section title="Featured" items={data.featured} />
 			<Section title="Popular" items={data.popular} />
 			<Section title="Newly Added" items={data.newly} />
