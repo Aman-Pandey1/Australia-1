@@ -3,6 +3,11 @@ import Navbar from './components/Navbar'
 import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import Home from './pages/Home'
+import About from './pages/About'
+import Contact from './pages/Contact'
+import Blogs from './pages/Blogs'
+import BlogDetail from './pages/BlogDetail'
+import City from './pages/City'
 import Admin from './pages/Admin'
 import Dashboard from './pages/Dashboard'
 import { Login, Register } from './pages/Auth'
@@ -22,6 +27,11 @@ export default function App() {
 			<AppLayout>
 				<Routes>
 					<Route path="/" element={<Home />} />
+					<Route path="/about" element={<About />} />
+					<Route path="/contact" element={<Contact />} />
+					<Route path="/blogs" element={<Blogs />} />
+					<Route path="/blogs/:slug" element={<BlogDetail />} />
+					<Route path="/city/:city" element={<City />} />
 					<Route path="/login" element={<Login />} />
 					<Route path="/register" element={<Register />} />
 					<Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
