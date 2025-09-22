@@ -5,9 +5,11 @@ export default function Admin() {
 	const [stats, setStats] = useState(null)
     const [pendingListings, setPendingListings] = useState([])
     const [pendingAds, setPendingAds] = useState([])
+    const [users, setUsers] = useState([])
 	useEffect(() => {
         api.get('/admin/summary').then(({ data }) => setStats(data)).catch(() => {})
         refreshQueues()
+        refreshUsers()
 	}, [])
 
     async function refreshQueues() {
@@ -19,6 +21,16 @@ export default function Admin() {
             setPendingListings(listData.listings || [])
             setPendingAds((adData.ads || []).filter(a => a.status === 'pending'))
         } catch {}
+    }
+    async function refreshUsers() {
+        try {
+            const { data } = await api.get('/admin/users')
+            setUsers(data.users || [])
+        } catch {}
+    }
+    async function setRole(userId, role) {
+        await api.patch(`/admin/users/${userId}/role`, { role })
+        await refreshUsers()
     }
 	return (
 		<div className="container py-4">
@@ -76,6 +88,43 @@ export default function Admin() {
                         </div>
                     ))}
                     {!pendingAds.length && <div className="text-muted">No pending ads.</div>}
+                </div>
+            </div>
+
+            <div className="mt-4">
+                <h2 className="h5 mb-2">Users</h2>
+                <div className="table-responsive">
+                    <table className="table table-sm align-middle">
+                        <thead>
+                            <tr>
+                                <th>Email</th>
+                                <th>Name</th>
+                                <th>Role</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {users.map(u => (
+                                <tr key={u._id}>
+                                    <td>{u.email}</td>
+                                    <td>{u.name || '-'}</td>
+                                    <td><span className="badge text-bg-secondary">{u.role}</span></td>
+                                    <td className="text-end">
+                                        {u.role !== 'admin' ? (
+                                            <button className="btn btn-sm btn-outline-primary" onClick={() => setRole(u._id, 'admin')}>Make admin</button>
+                                        ) : (
+                                            <button className="btn btn-sm btn-outline-secondary" onClick={() => setRole(u._id, 'user')}>Make user</button>
+                                        )}
+                                    </td>
+                                </tr>
+                            ))}
+                            {!users.length && (
+                                <tr>
+                                    <td colSpan={4} className="text-muted">No users</td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>

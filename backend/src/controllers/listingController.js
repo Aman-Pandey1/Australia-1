@@ -52,17 +52,48 @@ export async function adminApproveListing(req, res) {
 
 export async function homepageSections(_req, res) {
 	const now = dayjs().toDate();
-	const [featured, popular, newly] = await Promise.all([
-		Listing.find({ status: 'approved', 'premium.level': { $in: ['featured', 'vip', 'premium'] }, $or: [
-			{ 'premium.expiresAt': { $gt: now } },
-			{ 'premium.expiresAt': null },
-		] })
-			.sort({ 'premium.level': -1, createdAt: -1 })
-			.limit(12),
-		Listing.find({ status: 'approved' }).sort({ views: -1 }).limit(12),
-		Listing.find({ status: 'approved' }).sort({ createdAt: -1 }).limit(12),
-	]);
-	return res.json({ featured, popular, newly });
+    const [diamond, premium, free, featured, popular, newly] = await Promise.all([
+        // Diamond (VIP)
+        Listing.find({
+            status: 'approved',
+            'premium.level': 'vip',
+            $or: [
+                { 'premium.expiresAt': { $gt: now } },
+                { 'premium.expiresAt': null },
+            ],
+        })
+            .sort({ createdAt: -1 })
+            .limit(12),
+        // Premium (featured or premium)
+        Listing.find({
+            status: 'approved',
+            'premium.level': { $in: ['featured', 'premium'] },
+            $or: [
+                { 'premium.expiresAt': { $gt: now } },
+                { 'premium.expiresAt': null },
+            ],
+        })
+            .sort({ 'premium.level': -1, createdAt: -1 })
+            .limit(12),
+        // Free (no premium)
+        Listing.find({ status: 'approved', 'premium.level': { $in: [null, 'none'] } })
+            .sort({ createdAt: -1 })
+            .limit(12),
+        // Back-compat sections
+        Listing.find({
+            status: 'approved',
+            'premium.level': { $in: ['featured', 'vip', 'premium'] },
+            $or: [
+                { 'premium.expiresAt': { $gt: now } },
+                { 'premium.expiresAt': null },
+            ],
+        })
+            .sort({ 'premium.level': -1, createdAt: -1 })
+            .limit(12),
+        Listing.find({ status: 'approved' }).sort({ views: -1 }).limit(12),
+        Listing.find({ status: 'approved' }).sort({ createdAt: -1 }).limit(12),
+    ]);
+    return res.json({ diamond, premium, free, featured, popular, newly });
 }
 
 export async function cityListings(req, res) {

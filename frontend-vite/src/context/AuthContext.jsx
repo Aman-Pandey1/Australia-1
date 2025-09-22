@@ -31,7 +31,11 @@ export function AuthProvider({ children }) {
 		setToken(data.token)
 		setUser(data.user)
 		toast.success('Logged in')
-		navigate('/')
+    if (data.user?.role === 'admin') {
+        navigate('/admin')
+    } else {
+        navigate('/')
+    }
 	}
 
 	async function register(payload) {

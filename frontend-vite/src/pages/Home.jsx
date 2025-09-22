@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import api from '../lib/api'
 
 export default function Home() {
-	const [data, setData] = useState({ featured: [], popular: [], newly: [] })
+	const [data, setData] = useState({ diamond: [], premium: [], free: [], featured: [], popular: [], newly: [] })
 	const [homepageAds, setHomepageAds] = useState([])
 	useEffect(() => {
 		api.get('/listings/home/sections').then(({ data }) => setData(data)).catch(() => {})
@@ -38,6 +38,9 @@ export default function Home() {
 					))}
 				</div>
 			</div>
+			<Section title="Diamond" items={data.diamond} badge="VIP" />
+			<Section title="Premium" items={data.premium} />
+			<Section title="Free" items={data.free} />
 			<Section title="Featured" items={data.featured} />
 			<Section title="Popular" items={data.popular} />
 			<Section title="Newly Added" items={data.newly} />
@@ -45,7 +48,7 @@ export default function Home() {
 	)
 }
 
-function Section({ title, items }) {
+function Section({ title, items, badge }) {
 	return (
 		<div className="mb-8">
 			<div className="d-flex align-items-center mb-3">
@@ -59,6 +62,7 @@ function Section({ title, items }) {
 							<div className="card-body">
 								<div className="fw-semibold">{it.title}</div>
 								<div className="text-muted small">{it.contact?.city}</div>
+								{badge && <span className="badge text-bg-warning mt-1">{badge}</span>}
 							</div>
 						</div>
 					</div>
