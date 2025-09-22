@@ -1,10 +1,18 @@
 import mongoose from 'mongoose';
 import { env } from './env.js';
+let memoryServer = null;
 
 export async function connectDatabase() {
 	try {
 		mongoose.set('strictQuery', true);
-		await mongoose.connect(env.MONGODB_URI, {
+		let mongoUri = env.MONGODB_URI;
+		if (mongoUri === 'memory' || String(process.env.USE_MEMORY_DB).toLowerCase() === 'true') {
+			// Lazy import to avoid dependency if not used
+			const { MongoMemoryServer } = await import('mongodb-memory-server');
+			memoryServer = await MongoMemoryServer.create();
+			mongoUri = memoryServer.getUri();
+		}
+		await mongoose.connect(mongoUri, {
 			bufferCommands: false,
 			serverSelectionTimeoutMS: 2000,
 		});
