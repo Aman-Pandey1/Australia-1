@@ -8,12 +8,14 @@ import {
 	getListing,
 	myListings,
 	updateListing,
+	homepageSections,
 } from '../controllers/listingController.js';
 
 const router = Router();
 
 router.get('/city/:city', cityListings);
 router.get('/slug/:slug', getListing);
+router.get('/home/sections', homepageSections);
 
 router.get('/me', authenticate, myListings);
 
