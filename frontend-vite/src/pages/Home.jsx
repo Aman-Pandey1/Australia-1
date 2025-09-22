@@ -4,12 +4,31 @@ import api from '../lib/api'
 
 export default function Home() {
 	const [data, setData] = useState({ featured: [], popular: [], newly: [] })
+	const [homepageAds, setHomepageAds] = useState([])
 	useEffect(() => {
 		api.get('/listings/home/sections').then(({ data }) => setData(data)).catch(() => {})
+		api.get('/ads/homepage/active').then(({ data }) => setHomepageAds(data.ads || [])).catch(() => {})
 	}, [])
 	return (
 		<div className="container mx-auto px-4 py-8">
 			<h1 className="text-3xl font-bold mb-3">Discover</h1>
+			{homepageAds?.length > 0 && (
+				<div className="mb-4">
+					<div className="d-flex align-items-center mb-2"><h2 className="h5 m-0">VIP on Homepage</h2></div>
+					<div className="row g-3">
+						{homepageAds.map(({ listing, _id }) => (
+							<div className="col-6 col-md-3" key={_id}>
+								<div className="card h-100 border-warning shadow-sm">
+									<div className="ratio ratio-1x1 bg-light" style={{ backgroundImage: `url(${listing?.photos?.[0] || ''})`, backgroundSize: 'cover' }} />
+									<div className="card-body">
+										<div className="fw-semibold">{listing?.title}</div>
+									</div>
+								</div>
+							</div>
+						))}
+					</div>
+				</div>
+			)}
 			<div className="mb-4">
 				<div className="row g-2">
 					{['Sydney','Melbourne','Brisbane','Perth','Adelaide','Canberra'].map(c => (
