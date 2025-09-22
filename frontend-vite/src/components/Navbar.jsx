@@ -13,8 +13,9 @@ export default function Navbar() {
 				<div className="collapse navbar-collapse" id="nav">
 					<ul className="navbar-nav ms-auto mb-2 mb-lg-0">
 						<li className="nav-item"><NavLink to="/" className="nav-link">Home</NavLink></li>
-						<li className="nav-item"><NavLink to="/city/Sydney" className="nav-link">Sydney</NavLink></li>
-						<li className="nav-item"><NavLink to="/city/Melbourne" className="nav-link">Melbourne</NavLink></li>
+						<li className="nav-item"><NavLink to="/about" className="nav-link">About Us</NavLink></li>
+						<li className="nav-item"><NavLink to="/blogs" className="nav-link">Blogs</NavLink></li>
+						<li className="nav-item"><NavLink to="/contact" className="nav-link">Contact Us</NavLink></li>
 						{user ? (
 							<>
 								<li className="nav-item"><NavLink to="/dashboard" className="nav-link">Dashboard</NavLink></li>
