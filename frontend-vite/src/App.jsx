@@ -8,6 +8,7 @@ import Contact from './pages/Contact'
 import Blogs from './pages/Blogs'
 import BlogDetail from './pages/BlogDetail'
 import City from './pages/City'
+import Category from './pages/Category'
 import Admin from './pages/Admin'
 import Dashboard from './pages/Dashboard'
 import { Login, Register } from './pages/Auth'
@@ -32,6 +33,7 @@ export default function App() {
 					<Route path="/blogs" element={<Blogs />} />
 					<Route path="/blogs/:slug" element={<BlogDetail />} />
 					<Route path="/city/:city" element={<City />} />
+					<Route path="/category/:slug" element={<Category />} />
 					<Route path="/login" element={<Login />} />
 					<Route path="/register" element={<Register />} />
 					<Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />

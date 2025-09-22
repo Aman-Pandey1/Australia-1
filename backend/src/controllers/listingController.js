@@ -97,8 +97,28 @@ export async function homepageSections(_req, res) {
 }
 
 export async function cityListings(req, res) {
-	const { city } = req.params;
-	const listings = await Listing.find({ status: 'approved', 'contact.city': city }).sort({ 'premium.level': -1, createdAt: -1 });
-	return res.json({ listings });
+    const { city } = req.params;
+    const { category, gender, premium } = req.query;
+    const where = { status: 'approved', 'contact.city': city };
+    if (category) where.categories = category;
+    if (gender) where['stats.gender'] = gender;
+    if (premium === 'vip') where['premium.level'] = 'vip';
+    if (premium === 'premium') where['premium.level'] = { $in: ['featured', 'premium'] };
+    if (premium === 'free') where['premium.level'] = { $in: [null, 'none'] };
+    const listings = await Listing.find(where).sort({ 'premium.level': -1, createdAt: -1 });
+    return res.json({ listings });
+}
+
+export async function categoryListings(req, res) {
+    const { category } = req.params;
+    const { city, gender, premium } = req.query;
+    const where = { status: 'approved', categories: category };
+    if (city) where['contact.city'] = city;
+    if (gender) where['stats.gender'] = gender;
+    if (premium === 'vip') where['premium.level'] = 'vip';
+    if (premium === 'premium') where['premium.level'] = { $in: ['featured', 'premium'] };
+    if (premium === 'free') where['premium.level'] = { $in: [null, 'none'] };
+    const listings = await Listing.find(where).sort({ 'premium.level': -1, createdAt: -1 });
+    return res.json({ listings });
 }
 

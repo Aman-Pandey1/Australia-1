@@ -44,6 +44,7 @@ const ListingSchema = new mongoose.Schema(
 		slug: { type: String, unique: true, index: true },
 		description: { type: String, default: '' },
 		photos: [{ type: String }],
+		categories: [{ type: String, index: true }],
 		contact: ContactSchema,
 		stats: StatsSchema,
 		premium: PremiumSchema,

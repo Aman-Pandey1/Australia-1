@@ -5,6 +5,14 @@ import api from '../lib/api'
 export default function Home() {
 	const [data, setData] = useState({ diamond: [], premium: [], free: [], featured: [], popular: [], newly: [] })
 	const [homepageAds, setHomepageAds] = useState([])
+    const categories = [
+        { key: 'Escort', label: 'Escort' },
+        { key: 'Massage', label: 'Massage' },
+        { key: 'Agency', label: 'Agency' },
+        { key: 'Independent', label: 'Independent' },
+        { key: 'GFE', label: 'GFE' },
+        { key: 'BDSM', label: 'BDSM' },
+    ]
 	useEffect(() => {
 		api.get('/listings/home/sections').then(({ data }) => setData(data)).catch(() => {})
 		api.get('/ads/homepage/active').then(({ data }) => setHomepageAds(data.ads || [])).catch(() => {})
@@ -29,7 +37,7 @@ export default function Home() {
 					</div>
 				</div>
 			)}
-			<div className="mb-4">
+            <div className="mb-4">
 				<div className="row g-2">
 					{['Sydney','Melbourne','Brisbane','Perth','Adelaide','Canberra'].map(c => (
 						<div className="col-6 col-md-2" key={c}>
@@ -38,6 +46,16 @@ export default function Home() {
 					))}
 				</div>
 			</div>
+            <div className="mb-5">
+                <div className="d-flex align-items-center mb-2"><h2 className="h5 m-0">Categories</h2></div>
+                <div className="row g-2">
+                    {categories.map(cat => (
+                        <div className="col-6 col-md-2" key={cat.key}>
+                            <Link to={`/category/${encodeURIComponent(cat.key)}`} className="btn btn-outline-primary w-100">{cat.label}</Link>
+                        </div>
+                    ))}
+                </div>
+            </div>
 			<Section title="Diamond" items={data.diamond} badge="VIP" />
 			<Section title="Premium" items={data.premium} />
 			<Section title="Free" items={data.free} />
