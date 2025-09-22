@@ -1,0 +1,5 @@
+@import "tailwindcss";
+
+/* Global base styles (keep minimal for Tailwind v4) */
+html, body, #root { height: 100%; }
+body { margin: 0; }
