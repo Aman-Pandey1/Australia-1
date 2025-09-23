@@ -39,6 +39,15 @@ app.get('/api/health', (_req, res) => {
 	res.json({ status: 'ok' });
 });
 
+// Redirect root to client home page so main route shows homepage
+app.get('/', (_req, res) => {
+    try {
+        return res.redirect(302, env.CLIENT_URL);
+    } catch {
+        return res.status(200).send('<!doctype html><html><head><meta http-equiv="refresh" content="0; url=' + (env.CLIENT_URL || '/') + '" /></head><body>Redirecting...</body></html>');
+    }
+});
+
 // API routes
 app.use('/api', apiRouter);
 
