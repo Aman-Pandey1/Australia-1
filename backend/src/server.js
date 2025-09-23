@@ -11,7 +11,6 @@ import { Subscription } from './models/Subscription.js';
 import dayjs from 'dayjs';
 import { User } from './models/User.js';
 import { sendEmail } from './utils/email.js';
-import { User } from './models/User.js';
 
 const app = express();
 

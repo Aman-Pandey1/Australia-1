@@ -14,6 +14,8 @@ export default function Listing() {
     const [newReview, setNewReview] = useState({ rating: 5, content: '' })
     const [newComment, setNewComment] = useState('')
     const [reportReason, setReportReason] = useState('')
+    const [activePhotoIdx, setActivePhotoIdx] = useState(0)
+    const [sections, setSections] = useState({ featured: [], newly: [] })
 
     const listingId = useMemo(() => listing?._id, [listing])
 
@@ -22,6 +24,7 @@ export default function Listing() {
             setLoading(true)
             const { data } = await api.get(`/listings/slug/${slug}`)
             setListing(data.listing)
+            setActivePhotoIdx(0)
         } catch {}
         finally { setLoading(false) }
     }
@@ -40,6 +43,9 @@ export default function Listing() {
 
     useEffect(() => { load() }, [slug])
     useEffect(() => { loadSocial() }, [listingId])
+    useEffect(() => {
+        api.get('/listings/home/sections').then(({ data }) => setSections({ featured: data.featured || [], newly: data.newly || [] })).catch(() => {})
+    }, [])
 
     useEffect(() => {
         if (listing?.title) {
@@ -91,11 +97,6 @@ export default function Listing() {
     }
 
     const infoRows = [
-        ['City', listing?.contact?.city || '-'],
-        ['Country', listing?.contact?.country || '-'],
-        ['Phone', listing?.contact?.phone || '-'],
-        ['WhatsApp', listing?.contact?.whatsapp || '-'],
-        ['Telegram', listing?.contact?.telegram || '-'],
         ['Gender', listing?.stats?.gender || '-'],
         ['Age', listing?.stats?.age ? String(listing.stats.age) : '-'],
         ['Height', listing?.stats?.height || '-'],
@@ -109,48 +110,55 @@ export default function Listing() {
     return (
         <div className="container py-4">
             <nav className="mb-3"><Link to="/">Home</Link> / <span>{listing.title}</span></nav>
-            <h1 className="h3 mb-2">{listing.title}</h1>
-            <div className="text-muted mb-3">{listing.contact?.city || ''}</div>
-
-            {Array.isArray(listing.photos) && listing.photos.length > 0 && (
-                <div className="row g-2 mb-3">
-                    {listing.photos.map((url, idx) => (
-                        <div className="col-6 col-md-3" key={idx}>
-                            <img src={url} alt="" className="img-fluid rounded" loading="lazy" />
-                        </div>
-                    ))}
-                </div>
-            )}
-
-            {listing.description && (
-                <div className="card mb-3 shadow-sm">
-                    <div className="card-body">
-                        <div dangerouslySetInnerHTML={{ __html: nl2br(escapeHtml(listing.description)) }} />
-                    </div>
-                </div>
-            )}
+            <h1 className="h3 mb-1 text-uppercase">{listing.title}</h1>
+            <div className="text-secondary mb-3">{listing.contact?.city || ''}</div>
 
             <div className="row g-3">
-                <div className="col-md-7">
-                    <div className="card mb-3 shadow-sm">
-                        <div className="card-body">
-                            <div className="d-flex justify-content-between align-items-center mb-2">
-                                <div className="fw-semibold">Details</div>
-                                <div>
-                                    <button className="btn btn-sm btn-outline-primary me-2" onClick={addFavorite}>Add to favorites</button>
+                {/* Left: gallery + description + services + reviews/comments */}
+                <div className="col-lg-8">
+                    {/* Gallery */}
+                    {Array.isArray(listing.photos) && listing.photos.length > 0 && (
+                        <div className="card mb-3 shadow-sm">
+                            <div className="card-body">
+                                <div className="mb-2">
+                                    <img src={listing.photos[activePhotoIdx]} alt="" className="img-fluid rounded w-100" style={{ maxHeight: 520, objectFit: 'cover' }} />
+                                </div>
+                                <div className="d-flex gap-2 flex-wrap">
+                                    {listing.photos.map((url, idx) => (
+                                        <button key={idx} type="button" className={`p-0 border-0 bg-transparent ${activePhotoIdx === idx ? 'opacity-100' : 'opacity-75'}`} onClick={() => setActivePhotoIdx(idx)}>
+                                            <img src={url} alt="thumb" className="rounded" style={{ width: 90, height: 90, objectFit: 'cover', border: activePhotoIdx === idx ? '2px solid var(--color-primary)' : '1px solid var(--color-border)' }} />
+                                        </button>
+                                    ))}
                                 </div>
                             </div>
-                            <div className="row">
-                                {infoRows.map(([k, v]) => (
-                                    <div className="col-6 mb-2" key={k}>
-                                        <div className="text-muted small">{k}</div>
-                                        <div className="fw-semibold">{v}</div>
-                                    </div>
-                                ))}
+                        </div>
+                    )}
+
+                    {/* About me */}
+                    {listing.description && (
+                        <div className="card mb-3 shadow-sm">
+                            <div className="card-body">
+                                <div className="fw-semibold mb-2">About me</div>
+                                <div dangerouslySetInnerHTML={{ __html: nl2br(escapeHtml(listing.description)) }} />
                             </div>
                         </div>
-                    </div>
+                    )}
 
+                    {/* Services (use categories as a proxy) */}
+                    {Array.isArray(listing.categories) && listing.categories.length > 0 && (
+                        <div className="card mb-3 shadow-sm">
+                            <div className="card-body">
+                                <div className="fw-semibold mb-2">Services</div>
+                                <div className="d-flex flex-wrap gap-2">
+                                    {listing.categories.map((c) => (
+                                        <span key={c} className="badge bg-secondary-subtle border text-secondary">{c}</span>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Reviews */}
                     <div className="card mb-3 shadow-sm">
                         <div className="card-body">
                             <div className="fw-semibold mb-2">Reviews</div>
@@ -182,6 +190,7 @@ export default function Listing() {
                         </div>
                     </div>
 
+                    {/* Comments */}
                     <div className="card mb-3 shadow-sm">
                         <div className="card-body">
                             <div className="fw-semibold mb-2">Comments</div>
@@ -204,7 +213,74 @@ export default function Listing() {
                         </div>
                     </div>
                 </div>
-                <div className="col-md-5">
+
+                {/* Right: info, contact, rates, availability, report */}
+                <div className="col-lg-4">
+                    <div className="card mb-3 shadow-sm">
+                        <div className="card-body">
+                            <div className="d-flex justify-content-between align-items-center mb-2">
+                                <div className="fw-semibold">Info</div>
+                                <div>
+                                    <button className="btn btn-sm btn-outline-primary" onClick={addFavorite}>Add to favorites</button>
+                                </div>
+                            </div>
+                            <div className="row">
+                                {infoRows.map(([k, v]) => (
+                                    <div className="col-6 mb-2" key={k}>
+                                        <div className="text-muted small">{k}</div>
+                                        <div className="fw-semibold">{v}</div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="card mb-3 shadow-sm">
+                        <div className="card-body">
+                            <div className="fw-semibold mb-2">Contact</div>
+                            <div className="mb-1"><span className="text-muted small d-block">City</span><span className="fw-semibold">{listing?.contact?.city || '-'}</span></div>
+                            <div className="mb-1"><span className="text-muted small d-block">Country</span><span className="fw-semibold">{listing?.contact?.country || '-'}</span></div>
+                            {listing?.contact?.phone && <div className="mb-1"><span className="text-muted small d-block">Phone</span><span className="fw-semibold">{listing.contact.phone}</span></div>}
+                            {listing?.contact?.whatsapp && <div className="mb-1"><span className="text-muted small d-block">WhatsApp</span><span className="fw-semibold">{listing.contact.whatsapp}</span></div>}
+                            {listing?.contact?.telegram && <div className="mb-1"><span className="text-muted small d-block">Telegram</span><span className="fw-semibold">{listing.contact.telegram}</span></div>}
+                        </div>
+                    </div>
+
+                    {listing?.rates && (
+                        <div className="card mb-3 shadow-sm">
+                            <div className="card-body">
+                                <div className="fw-semibold mb-2">Rates</div>
+                                <div className="row">
+                                    <div className="col-12 col-md-6">
+                                        <div className="text-muted small mb-1">In-call</div>
+                                        <ul className="list-unstyled small mb-0">
+                                            {Object.entries(listing.rates.incall || {}).map(([k,v]) => (
+                                                <li key={k} className="d-flex justify-content-between"><span>{k}</span><span className="fw-semibold">{v}</span></li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                    <div className="col-12 col-md-6">
+                                        <div className="text-muted small mb-1">Out-call</div>
+                                        <ul className="list-unstyled small mb-0">
+                                            {Object.entries(listing.rates.outcall || {}).map(([k,v]) => (
+                                                <li key={k} className="d-flex justify-content-between"><span>{k}</span><span className="fw-semibold">{v}</span></li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {listing?.availability && (
+                        <div className="card mb-3 shadow-sm">
+                            <div className="card-body">
+                                <div className="fw-semibold mb-2">Availability</div>
+                                <div className="small text-secondary">{listing.availability}</div>
+                            </div>
+                        </div>
+                    )}
+
                     <div className="card mb-3 shadow-sm">
                         <div className="card-body">
                             <div className="fw-semibold mb-2">Report</div>
@@ -219,6 +295,27 @@ export default function Listing() {
                     </div>
                 </div>
             </div>
+
+            {/* Explore / We also recommend */}
+            <section className="mt-4">
+                <h2 className="h6 mb-2">Explore</h2>
+                <div className="scroll-row">
+                    {(sections.featured.length ? sections.featured : sections.newly).slice(0, 12).map((it, idx) => (
+                        <div key={it._id} className="card listing-card">
+                            <Link to={`/l/${it.slug}`} className="text-decoration-none text-reset">
+                                <div className="ratio-1x1">
+                                    <div className="bg-cover" style={{ backgroundImage: `url(${(it.photos?.[0]) || 'https://picsum.photos/seed/rec'+idx+'/800/800'})` }}></div>
+                                    <div className="thumb-overlay"></div>
+                                </div>
+                            </Link>
+                            <div className="card-body">
+                                <div className="fw-semibold text-truncate">{it.title}</div>
+                                <div className="small text-secondary">{it.contact?.city}</div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </section>
         </div>
     )
 }
