@@ -52,22 +52,73 @@ export async function adminApproveListing(req, res) {
 
 export async function homepageSections(_req, res) {
 	const now = dayjs().toDate();
-	const [featured, popular, newly] = await Promise.all([
-		Listing.find({ status: 'approved', 'premium.level': { $in: ['featured', 'vip', 'premium'] }, $or: [
-			{ 'premium.expiresAt': { $gt: now } },
-			{ 'premium.expiresAt': null },
-		] })
-			.sort({ 'premium.level': -1, createdAt: -1 })
-			.limit(12),
-		Listing.find({ status: 'approved' }).sort({ views: -1 }).limit(12),
-		Listing.find({ status: 'approved' }).sort({ createdAt: -1 }).limit(12),
-	]);
-	return res.json({ featured, popular, newly });
+    const [diamond, premium, free, featured, popular, newly] = await Promise.all([
+        // Diamond (VIP)
+        Listing.find({
+            status: 'approved',
+            'premium.level': 'vip',
+            $or: [
+                { 'premium.expiresAt': { $gt: now } },
+                { 'premium.expiresAt': null },
+            ],
+        })
+            .sort({ createdAt: -1 })
+            .limit(12),
+        // Premium (featured or premium)
+        Listing.find({
+            status: 'approved',
+            'premium.level': { $in: ['featured', 'premium'] },
+            $or: [
+                { 'premium.expiresAt': { $gt: now } },
+                { 'premium.expiresAt': null },
+            ],
+        })
+            .sort({ 'premium.level': -1, createdAt: -1 })
+            .limit(12),
+        // Free (no premium)
+        Listing.find({ status: 'approved', 'premium.level': { $in: [null, 'none'] } })
+            .sort({ createdAt: -1 })
+            .limit(12),
+        // Back-compat sections
+        Listing.find({
+            status: 'approved',
+            'premium.level': { $in: ['featured', 'vip', 'premium'] },
+            $or: [
+                { 'premium.expiresAt': { $gt: now } },
+                { 'premium.expiresAt': null },
+            ],
+        })
+            .sort({ 'premium.level': -1, createdAt: -1 })
+            .limit(12),
+        Listing.find({ status: 'approved' }).sort({ views: -1 }).limit(12),
+        Listing.find({ status: 'approved' }).sort({ createdAt: -1 }).limit(12),
+    ]);
+    return res.json({ diamond, premium, free, featured, popular, newly });
 }
 
 export async function cityListings(req, res) {
-	const { city } = req.params;
-	const listings = await Listing.find({ status: 'approved', 'contact.city': city }).sort({ 'premium.level': -1, createdAt: -1 });
-	return res.json({ listings });
+    const { city } = req.params;
+    const { category, gender, premium } = req.query;
+    const where = { status: 'approved', 'contact.city': city };
+    if (category) where.categories = category;
+    if (gender) where['stats.gender'] = gender;
+    if (premium === 'vip') where['premium.level'] = 'vip';
+    if (premium === 'premium') where['premium.level'] = { $in: ['featured', 'premium'] };
+    if (premium === 'free') where['premium.level'] = { $in: [null, 'none'] };
+    const listings = await Listing.find(where).sort({ 'premium.level': -1, createdAt: -1 });
+    return res.json({ listings });
+}
+
+export async function categoryListings(req, res) {
+    const { category } = req.params;
+    const { city, gender, premium } = req.query;
+    const where = { status: 'approved', categories: category };
+    if (city) where['contact.city'] = city;
+    if (gender) where['stats.gender'] = gender;
+    if (premium === 'vip') where['premium.level'] = 'vip';
+    if (premium === 'premium') where['premium.level'] = { $in: ['featured', 'premium'] };
+    if (premium === 'free') where['premium.level'] = { $in: [null, 'none'] };
+    const listings = await Listing.find(where).sort({ 'premium.level': -1, createdAt: -1 });
+    return res.json({ listings });
 }
 
