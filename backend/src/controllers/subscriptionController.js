@@ -1,5 +1,7 @@
 import dayjs from 'dayjs';
 import { Subscription } from '../models/Subscription.js';
+import { User } from '../models/User.js';
+import { sendEmail } from '../utils/email.js';
 
 export async function getMySubscription(req, res) {
 	const sub = await Subscription.findOne({ user: req.user.id, status: 'active' }).sort({ createdAt: -1 });
@@ -20,6 +22,15 @@ export async function rechargeSubscription(req, res) {
 		sub.expiresAt = newEnd.toDate();
 		await sub.save();
 	}
+    // Notify user
+    try {
+        const user = await User.findById(req.user.id).select('email name');
+        if (user?.email) {
+            const remainingDays = Math.max(0, newEnd.diff(now, 'day'));
+            const html = `<p>Hi ${user?.name || ''},</p><p>Your subscription is active until <strong>${newEnd.format('YYYY-MM-DD')}</strong> (${remainingDays} days).</p>`;
+            await sendEmail({ to: user.email, subject: 'Subscription updated', html });
+        }
+    } catch {}
 	return res.json({ subscription: sub, remainingDays: Math.max(0, newEnd.diff(now, 'day')) });
 }
 
