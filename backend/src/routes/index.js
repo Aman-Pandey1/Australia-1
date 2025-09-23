@@ -9,7 +9,6 @@ import reportRoutes from './reports.js';
 import subscriptionRoutes from './subscriptions.js';
 import adRoutes from './ads.js';
 import contentRoutes from './content.js';
-import { Router } from 'express';
 import { Setting } from '../models/Setting.js';
 
 const router = Router();
