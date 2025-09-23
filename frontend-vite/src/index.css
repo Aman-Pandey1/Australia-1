@@ -1,5 +1,74 @@
 @import "tailwindcss";
 
-/* Global base styles (keep minimal for Tailwind v4) */
+/* Theme variables */
+:root {
+  --color-bg: #0b0c0f;
+  --color-panel: #111318;
+  --color-surface: #161a22;
+  --color-border: #222633;
+  --color-text: #e6e8ee;
+  --color-muted: #a7adbb;
+  --color-primary: #ff2e63; /* accent pink */
+  --color-gold: #f7b500;
+}
+
 html, body, #root { height: 100%; }
-body { margin: 0; }
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+}
+
+/* Utility containers */
+.container {
+  max-width: 1200px;
+}
+
+/* Cards */
+.card { background: var(--color-panel); border: 1px solid var(--color-border); border-radius: 10px; overflow: hidden; }
+.card .card-body { color: var(--color-text); }
+
+/* Navbar dark */
+.navbar-dark { background: #0e1015 !important; border-bottom: 1px solid var(--color-border); }
+.navbar-dark .navbar-brand, .navbar-dark .nav-link { color: var(--color-text) !important; }
+.navbar-dark .nav-link.active { color: var(--color-primary) !important; }
+
+/* Buttons */
+.btn-primary { background-color: var(--color-primary); border-color: var(--color-primary); }
+.btn-outline-secondary { border-color: var(--color-border); color: var(--color-text); }
+.btn-outline-secondary:hover { background: var(--color-surface); }
+
+/* Badges */
+.badge-vip { background: var(--color-gold); color: #111; font-weight: 700; }
+
+/* Section titles */
+.section-title { color: #fff; font-weight: 700; }
+.section-sub { color: var(--color-muted); }
+
+/* Grid fixes when mixing Bootstrap + custom */
+.ratio-1x1 { position: relative; width: 100%; padding-top: 100%; }
+.ratio-1x1 > * { position: absolute; inset: 0; }
+.bg-cover { background-size: cover; background-position: center; }
+
+/* Footer */
+footer.footer { background: #0a0c10; border-top: 1px solid var(--color-border); color: var(--color-muted); }
+
+/* Scroll row (carousel-like) */
+.scroll-row { display: grid; grid-auto-flow: column; grid-auto-columns: 240px; gap: 14px; overflow-x: auto; padding-bottom: 6px; }
+.scroll-row::-webkit-scrollbar { height: 8px; }
+.scroll-row::-webkit-scrollbar-thumb { background: #2a3040; border-radius: 6px; }
+
+/* Listing card embellishments */
+.listing-card { position: relative; }
+.listing-card .thumb-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,.55), rgba(0,0,0,0)); opacity: .9; pointer-events: none; }
+.listing-card .ribbon { position: absolute; top: 10px; left: -8px; background: var(--color-primary); color: #fff; font-size: 12px; padding: 4px 10px; border-top-right-radius: 6px; border-bottom-right-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,.25); }
+.listing-card .pill { position: absolute; bottom: 10px; left: 10px; background: #1f2430; color: #fff; border: 1px solid var(--color-border); border-radius: 999px; padding: 2px 8px; font-size: 12px; font-weight: 600; }
+.listing-card .pill-gold { background: #2a1f00; color: var(--color-gold); border-color: #4a3a10; }
+
+/* Responsive tweaks */
+@media (max-width: 576px) {
+  .scroll-row { grid-auto-columns: 180px; gap: 10px; }
+  .container { padding-left: 16px; padding-right: 16px; }
+}
+
