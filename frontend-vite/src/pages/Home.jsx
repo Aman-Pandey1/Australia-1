@@ -11,34 +11,41 @@ export default function Home() {
 		api.get('/ads/homepage/active').then(({ data }) => setHomepageAds(data.ads || [])).catch(() => {})
 	}, [])
 
+	// Fallback image + sample data helpers (for testing without backend images)
+	const sampleCities = ['Sydney','Melbourne','Brisbane','Perth','Adelaide','Canberra']
+	const getFallbackImage = (i) => `https://picsum.photos/seed/escortify${i}/800/800`
+	const buildSampleListing = (i) => ({ _id: `sample-${i}`, slug: `sample-${i}`, title: `Sample profile ${i + 1}`, photos: [getFallbackImage(i)], contact: { city: sampleCities[i % sampleCities.length] } })
+	const sampleListings = (count) => Array.from({ length: count }, (_, i) => buildSampleListing(i))
+	const heroData = (homepageAds && homepageAds.length ? homepageAds : sampleListings(10).map((l, i) => ({ _id: `hero-${i}`, listing: l })))
+	const featuredData = (data.featured && data.featured.length ? data.featured : sampleListings(8))
+	const latestData = (data.newly && data.newly.length ? data.newly : sampleListings(12))
+
 	return (
 		<div className="container py-4">
 			{/* Hero VIP scroll row */}
-			{homepageAds?.length > 0 && (
-				<section className="mb-4">
-					<div className="d-flex align-items-center justify-content-between mb-2">
-						<h2 className="section-title h5 m-0">VIP on homepage</h2>
-					</div>
-					<div className="scroll-row">
-						{homepageAds.map(({ listing, _id }, idx) => (
-							<div key={_id} className="card listing-card">
-								<Link to={listing?.slug ? `/l/${listing.slug}` : '#'} className="text-decoration-none text-reset">
-									<div className="ratio-1x1">
-										<div className="bg-cover" style={{ backgroundImage: `url(${listing?.photos?.[0] || ''})` }}></div>
-										<div className="thumb-overlay"></div>
-										<div className="ribbon">Available now</div>
-										<div className="pill pill-gold">VIP</div>
-									</div>
-								</Link>
-								<div className="card-body">
-									<div className="fw-semibold text-truncate">{listing?.title}</div>
-									<div className="small text-secondary">{listing?.contact?.city || 'Australia'}</div>
+			<section className="mb-4">
+				<div className="d-flex align-items-center justify-content-between mb-2">
+					<h2 className="section-title h5 m-0">VIP on homepage</h2>
+				</div>
+				<div className="scroll-row">
+					{heroData.map(({ listing, _id }, idx) => (
+						<div key={_id} className="card listing-card">
+							<Link to={listing?.slug ? `/l/${listing.slug}` : '#'} className="text-decoration-none text-reset">
+								<div className="ratio-1x1">
+									<div className="bg-cover" style={{ backgroundImage: `url(${(listing?.photos?.[0]) || getFallbackImage(idx)})` }}></div>
+									<div className="thumb-overlay"></div>
+									<div className="ribbon">Available now</div>
+									<div className="pill pill-gold">VIP</div>
 								</div>
+							</Link>
+							<div className="card-body">
+								<div className="fw-semibold text-truncate">{listing?.title || 'Sample profile'}</div>
+								<div className="small text-secondary">{listing?.contact?.city || sampleCities[idx % sampleCities.length]}</div>
 							</div>
-						))}
-					</div>
-				</section>
-			)}
+						</div>
+					))}
+				</div>
+			</section>
 
 			{/* Featured independent escorts */}
 			<section className="mb-5">
@@ -47,11 +54,11 @@ export default function Home() {
 					<div className="section-sub small">Take a look at our verified featured escorts from around Australia.</div>
 				</div>
 				<div className="scroll-row">
-					{(data.featured || []).map((it) => (
+					{(featuredData || []).map((it, idx) => (
 						<div key={it._id} className="card listing-card">
 							<Link to={`/l/${it.slug}`} className="text-decoration-none text-reset">
 								<div className="ratio-1x1">
-									<div className="bg-cover" style={{ backgroundImage: `url(${it.photos?.[0] || ''})` }}></div>
+									<div className="bg-cover" style={{ backgroundImage: `url(${(it.photos?.[0]) || getFallbackImage(idx)})` }}></div>
 									<div className="thumb-overlay"></div>
 									<div className="pill pill-gold">FEATURED</div>
 								</div>
@@ -69,12 +76,12 @@ export default function Home() {
 			<section className="mb-5">
 				<h2 className="section-title h5 mb-2">Latest Australian escorts and adult entertainers</h2>
 				<div className="row g-3">
-					{(data.newly || []).slice(0, 12).map((it) => (
+					{(latestData || []).slice(0, 12).map((it, idx) => (
 						<div className="col-6 col-md-3 col-lg-2" key={it._id}>
 							<div className="card h-100 listing-card">
 								<Link to={`/l/${it.slug}`} className="text-decoration-none text-reset">
 									<div className="ratio-1x1">
-										<div className="bg-cover" style={{ backgroundImage: `url(${it.photos?.[0] || ''})` }}></div>
+										<div className="bg-cover" style={{ backgroundImage: `url(${(it.photos?.[0]) || getFallbackImage(idx)})` }}></div>
 										<div className="thumb-overlay"></div>
 									</div>
 								</Link>
@@ -85,7 +92,7 @@ export default function Home() {
 							</div>
 						</div>
 					))}
-					{!(data.newly || []).length && <div className="text-secondary">No items</div>}
+					{!(latestData || []).length && <div className="text-secondary">No items</div>}
 				</div>
 			</section>
 
