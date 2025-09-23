@@ -9,6 +9,7 @@ import { AdPurchase } from '../models/AdPurchase.js';
 import { Post } from '../models/Post.js';
 import { Page } from '../models/Page.js';
 import { Setting } from '../models/Setting.js';
+import { sendEmail } from '../utils/email.js';
 
 export async function dashboardSummary(_req, res) {
 	const [users, listingsPending, listingsApproved, reviewsPending, commentsPending, reportsPending, adsPending, subsActive] =
@@ -58,10 +59,18 @@ export async function listListings(req, res) {
 export async function setListingStatus(req, res) {
 	const { id } = req.params;
 	const { status } = req.body; // approved | rejected | pending
-	const listing = await Listing.findById(id);
+    const listing = await Listing.findById(id).populate('owner', 'email name');
 	if (!listing) return res.status(404).json({ message: 'Not found' });
 	listing.status = status;
 	await listing.save();
+    try {
+        const ownerEmail = listing?.owner?.email;
+        if (ownerEmail) {
+            const subject = status === 'approved' ? 'Your listing has been approved' : (status === 'rejected' ? 'Your listing was rejected' : 'Listing status updated');
+            const html = `<p>Hi ${listing?.owner?.name || ''},</p><p>Your listing <strong>${listing.title}</strong> status is now <strong>${status}</strong>.</p>`;
+            await sendEmail({ to: ownerEmail, subject, html });
+        }
+    } catch {}
 	return res.json({ listing });
 }
 
@@ -156,7 +165,7 @@ export async function listAds(_req, res) {
 export async function setAdStatus(req, res) {
 	const { id } = req.params;
 	const { status } = req.body; // approved | rejected
-	const ad = await AdPurchase.findById(id);
+    const ad = await AdPurchase.findById(id).populate('buyer', 'email name').populate('listing', 'title');
 	if (!ad) return res.status(404).json({ message: 'Not found' });
 	ad.status = status;
 	if (status === 'approved') {
@@ -164,7 +173,7 @@ export async function setAdStatus(req, res) {
 		ad.startsAt = now.toDate();
 		ad.expiresAt = now.add(30, 'day').toDate();
 		// Update listing premium according to ad type
-		const listing = await Listing.findById(ad.listing);
+        const listing = await Listing.findById(ad.listing);
 		if (listing) {
 			listing.premium = listing.premium || {};
 			if (ad.type === 'homepage') {
@@ -185,6 +194,14 @@ export async function setAdStatus(req, res) {
 		}
 	}
 	await ad.save();
+    try {
+        const buyerEmail = ad?.buyer?.email;
+        if (buyerEmail) {
+            const subject = status === 'approved' ? 'Your ad purchase was approved' : (status === 'rejected' ? 'Your ad purchase was rejected' : 'Ad status updated');
+            const html = `<p>Hi ${ad?.buyer?.name || ''},</p><p>Your ad for <strong>${ad?.listing?.title || ad.listing}</strong> is now <strong>${status}</strong>.</p>`;
+            await sendEmail({ to: buyerEmail, subject, html });
+        }
+    } catch {}
 	return res.json({ ad });
 }
 

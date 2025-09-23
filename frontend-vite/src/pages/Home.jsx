@@ -23,13 +23,15 @@ export default function Home() {
 			{homepageAds?.length > 0 && (
 				<div className="mb-4">
 					<div className="d-flex align-items-center mb-2"><h2 className="h5 m-0">VIP on Homepage</h2></div>
-					<div className="row g-3">
-						{homepageAds.map(({ listing, _id }) => (
+                    <div className="row g-3">
+                        {homepageAds.map(({ listing, _id }) => (
 							<div className="col-6 col-md-3" key={_id}>
 								<div className="card h-100 border-warning shadow-sm">
-									<div className="ratio ratio-1x1 bg-light" style={{ backgroundImage: `url(${listing?.photos?.[0] || ''})`, backgroundSize: 'cover' }} />
+                                    <Link to={listing?.slug ? `/l/${listing.slug}` : '#'} className="text-decoration-none text-reset">
+                                        <div className="ratio ratio-1x1 bg-light" style={{ backgroundImage: `url(${listing?.photos?.[0] || ''})`, backgroundSize: 'cover' }} />
+                                    </Link>
 									<div className="card-body">
-										<div className="fw-semibold">{listing?.title}</div>
+                                        <Link to={listing?.slug ? `/l/${listing.slug}` : '#'} className="fw-semibold text-decoration-none">{listing?.title}</Link>
 									</div>
 								</div>
 							</div>
@@ -56,12 +58,12 @@ export default function Home() {
                     ))}
                 </div>
             </div>
-			<Section title="Diamond" items={data.diamond} badge="VIP" />
-			<Section title="Premium" items={data.premium} />
-			<Section title="Free" items={data.free} />
-			<Section title="Featured" items={data.featured} />
-			<Section title="Popular" items={data.popular} />
-			<Section title="Newly Added" items={data.newly} />
+            <Section title="Diamond" items={data.diamond} badge="VIP" />
+            <Section title="Premium" items={data.premium} />
+            <Section title="Free" items={data.free} />
+            <Section title="Featured" items={data.featured} />
+            <Section title="Popular" items={data.popular} />
+            <Section title="Newly Added" items={data.newly} />
 		</div>
 	)
 }
@@ -73,12 +75,14 @@ function Section({ title, items, badge }) {
 				<h2 className="h4 m-0">{title}</h2>
 			</div>
 			<div className="row g-3">
-				{items.map((it) => (
+                {items.map((it) => (
 					<div className="col-6 col-md-3" key={it._id}>
 						<div className="card h-100 shadow-sm">
-							<div className="ratio ratio-1x1 bg-light" style={{ backgroundImage: `url(${it.photos?.[0] || ''})`, backgroundSize: 'cover' }} />
+                            <Link to={`/l/${it.slug}`} className="text-decoration-none text-reset">
+                                <div className="ratio ratio-1x1 bg-light" style={{ backgroundImage: `url(${it.photos?.[0] || ''})`, backgroundSize: 'cover' }} />
+                            </Link>
 							<div className="card-body">
-								<div className="fw-semibold">{it.title}</div>
+                                <Link to={`/l/${it.slug}`} className="fw-semibold text-decoration-none">{it.title}</Link>
 								<div className="text-muted small">{it.contact?.city}</div>
 								{badge && <span className="badge text-bg-warning mt-1">{badge}</span>}
 							</div>

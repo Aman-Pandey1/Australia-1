@@ -1,6 +1,16 @@
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-dotenv.config();
+// Load .env from backend root regardless of process.cwd()
+try {
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    const backendEnvPath = path.resolve(__dirname, '../../.env');
+    dotenv.config({ path: backendEnvPath });
+} catch {
+    dotenv.config();
+}
 
 export const env = {
 	NODE_ENV: process.env.NODE_ENV || 'development',
@@ -14,6 +24,9 @@ export const env = {
 	SMTP_USER: process.env.SMTP_USER || '',
 	SMTP_PASS: process.env.SMTP_PASS || '',
 	SMTP_FROM: process.env.SMTP_FROM || 'noreply@example.com',
+    ADMIN_EMAIL: process.env.ADMIN_EMAIL || 'admin@example.com',
+    ADMIN_PASSWORD: process.env.ADMIN_PASSWORD || 'Admin@123456',
+    ADMIN_NAME: process.env.ADMIN_NAME || 'Administrator',
 };
 
 export default env;

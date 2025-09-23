@@ -3,6 +3,7 @@ import Navbar from './components/Navbar'
 import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import Home from './pages/Home'
+import Listing from './pages/Listing'
 import About from './pages/About'
 import Contact from './pages/Contact'
 import Blogs from './pages/Blogs'
@@ -31,7 +32,8 @@ export default function App() {
 					<Route path="/about" element={<About />} />
 					<Route path="/contact" element={<Contact />} />
 					<Route path="/blogs" element={<Blogs />} />
-					<Route path="/blogs/:slug" element={<BlogDetail />} />
+                    <Route path="/blogs/:slug" element={<BlogDetail />} />
+                    <Route path="/l/:slug" element={<Listing />} />
 					<Route path="/city/:city" element={<City />} />
 					<Route path="/category/:slug" element={<Category />} />
 					<Route path="/login" element={<Login />} />
