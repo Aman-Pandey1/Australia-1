@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom'
 import Navbar from './components/Navbar'
+import Topbar from './components/Topbar'
 import Footer from './components/Footer'
 import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -18,6 +19,7 @@ import { Login, Register } from './pages/Auth'
 function AppLayout({ children }) {
 	return (
 		<div>
+            <Topbar />
 			<Navbar />
 			<main>{children}</main>
             <Footer />
