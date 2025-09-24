@@ -1,5 +1,37 @@
-# Vue 3 + Vite
+## Escortify-like Directory (Full‑stack)
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+This workspace contains a full-stack app with:
 
-Learn more about IDE Support for Vue in the [Vue Docs Scaling up Guide](https://vuejs.org/guide/scaling-up/tooling.html#ide-support).
+- `backend` — Express API (listings, auth, reviews, comments, favorites, ads)
+- `frontend-vite` — React + Vite SPA
+
+### Quick start
+
+1) Backend env (uses in-memory MongoDB by default)
+
+```bash
+cd backend
+cp .env.example .env || true
+npm i
+npm run dev
+```
+
+2) Frontend
+
+```bash
+cd frontend-vite
+npm i
+npm run dev
+```
+
+Default URLs:
+- API: `http://localhost:4000/api`
+- Frontend: `http://localhost:3000`
+
+Seed demo data:
+
+```bash
+cd backend && npm run seed:listings
+```
+
+Demo admin: `admin@example.com` / `Admin@123456`

@@ -4,15 +4,25 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "vue": "^3.5.21"
+    "dev": "concurrently \"npm:dev:server\" \"npm:dev:client\"",
+    "dev:server": "cd backend && npm run dev",
+    "dev:client": "cd frontend-vite && npm run dev",
+    "seed": "cd backend && npm run seed:listings"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^6.0.1",
-    "vite": "^7.1.7"
-  }
+    "concurrently": "^9.2.1"
+  },
+  "description": "Full-stack directory with Express API and React frontend.",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Aman-Pandey1/Australia-1.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Aman-Pandey1/Australia-1/issues"
+  },
+  "homepage": ""
 }

@@ -34,6 +34,10 @@ body {
 .navbar-dark .navbar-brand, .navbar-dark .nav-link { color: var(--color-text) !important; }
 .navbar-dark .nav-link.active { color: var(--color-primary) !important; }
 
+/* Topbar */
+.topbar { background: #0a0b0f; border-bottom: 1px solid var(--color-border); }
+.topbar .btn-primary { padding: 2px 10px; }
+
 /* Buttons */
 .btn-primary { background-color: var(--color-primary); border-color: var(--color-primary); }
 .btn-outline-secondary { border-color: var(--color-border); color: var(--color-text); }

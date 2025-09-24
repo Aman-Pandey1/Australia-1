@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import api from '../lib/api'
 
 export default function Home() {
-	const [data, setData] = useState({ diamond: [], premium: [], free: [], featured: [], popular: [], newly: [] })
+    const [data, setData] = useState({ diamond: [], premium: [], free: [], featured: [], popular: [], newly: [] })
 	const [homepageAds, setHomepageAds] = useState([])
 
 	useEffect(() => {
@@ -17,8 +17,11 @@ export default function Home() {
 	const buildSampleListing = (i) => ({ _id: `sample-${i}`, slug: `sample-${i}`, title: `Sample profile ${i + 1}`, photos: [getFallbackImage(i)], contact: { city: sampleCities[i % sampleCities.length] } })
 	const sampleListings = (count) => Array.from({ length: count }, (_, i) => buildSampleListing(i))
 	const heroData = (homepageAds && homepageAds.length ? homepageAds : sampleListings(10).map((l, i) => ({ _id: `hero-${i}`, listing: l })))
-	const featuredData = (data.featured && data.featured.length ? data.featured : sampleListings(8))
-	const latestData = (data.newly && data.newly.length ? data.newly : sampleListings(12))
+    const featuredData = (data.featured && data.featured.length ? data.featured : sampleListings(8))
+    const latestData = (data.newly && data.newly.length ? data.newly : sampleListings(12))
+    const diamondData = (data.diamond && data.diamond.length ? data.diamond : sampleListings(10))
+    const premiumData = (data.premium && data.premium.length ? data.premium : sampleListings(10))
+    const freeData = (data.free && data.free.length ? data.free : sampleListings(12))
 
 	return (
 		<div className="container py-4">
@@ -47,7 +50,55 @@ export default function Home() {
 				</div>
 			</section>
 
-			{/* Featured independent escorts */}
+            {/* Diamond (VIP) carousel */}
+            <section className="mb-5">
+                <div className="d-flex align-items-center justify-content-between mb-2">
+                    <h2 className="section-title h5 m-0">Diamond (VIP)</h2>
+                </div>
+                <div className="scroll-row">
+                    {(diamondData || []).map((it, idx) => (
+                        <div key={it._id} className="card listing-card">
+                            <Link to={`/l/${it.slug}`} className="text-decoration-none text-reset">
+                                <div className="ratio-1x1">
+                                    <div className="bg-cover" style={{ backgroundImage: `url(${(it.photos?.[0]) || getFallbackImage(idx)})` }}></div>
+                                    <div className="thumb-overlay"></div>
+                                    <div className="pill pill-gold">VIP</div>
+                                </div>
+                            </Link>
+                            <div className="card-body">
+                                <div className="fw-semibold text-truncate">{it.title}</div>
+                                <div className="small text-secondary">{it.contact?.city}</div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </section>
+
+            {/* Premium carousel */}
+            <section className="mb-5">
+                <div className="d-flex align-items-center justify-content-between mb-2">
+                    <h2 className="section-title h5 m-0">Premium</h2>
+                </div>
+                <div className="scroll-row">
+                    {(premiumData || []).map((it, idx) => (
+                        <div key={it._id} className="card listing-card">
+                            <Link to={`/l/${it.slug}`} className="text-decoration-none text-reset">
+                                <div className="ratio-1x1">
+                                    <div className="bg-cover" style={{ backgroundImage: `url(${(it.photos?.[0]) || getFallbackImage(idx)})` }}></div>
+                                    <div className="thumb-overlay"></div>
+                                    <div className="pill">PREMIUM</div>
+                                </div>
+                            </Link>
+                            <div className="card-body">
+                                <div className="fw-semibold text-truncate">{it.title}</div>
+                                <div className="small text-secondary">{it.contact?.city}</div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </section>
+
+            {/* Featured independent escorts */}
 			<section className="mb-5">
 				<div className="d-flex align-items-center justify-content-between mb-2">
 					<h2 className="section-title h5 m-0">Featured independent escorts</h2>
@@ -72,11 +123,11 @@ export default function Home() {
 				</div>
 			</section>
 
-			{/* Latest escorts grid */}
+            {/* Normal (Free) grid */}
 			<section className="mb-5">
-				<h2 className="section-title h5 mb-2">Latest Australian escorts and adult entertainers</h2>
+                <h2 className="section-title h5 mb-2">Latest Australian escorts and adult entertainers</h2>
 				<div className="row g-3">
-					{(latestData || []).slice(0, 12).map((it, idx) => (
+                    {(freeData || latestData).slice(0, 12).map((it, idx) => (
 						<div className="col-6 col-md-3 col-lg-2" key={it._id}>
 							<div className="card h-100 listing-card">
 								<Link to={`/l/${it.slug}`} className="text-decoration-none text-reset">
@@ -92,7 +143,7 @@ export default function Home() {
 							</div>
 						</div>
 					))}
-					{!(latestData || []).length && <div className="text-secondary">No items</div>}
+                    {!(freeData || []).length && <div className="text-secondary">No items</div>}
 				</div>
 			</section>
 
