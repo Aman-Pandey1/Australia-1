@@ -1,3 +1,30 @@
+import '../config/env.js';
+import bcrypt from 'bcryptjs';
+import { connectToDatabase } from '../config/db.js';
+import User from '../models/User.js';
+
+async function run() {
+  await connectToDatabase();
+  const email = 'admin@example.com';
+  const existing = await User.findOne({ email });
+  if (existing) {
+    // eslint-disable-next-line no-console
+    console.log('Admin already exists');
+    process.exit(0);
+  }
+  const admin = await User.create({
+    name: 'Admin',
+    email,
+    role: 'admin',
+    passwordHash: await bcrypt.hash('admin123', 10),
+  });
+  // eslint-disable-next-line no-console
+  console.log('Admin created:', admin.email);
+  process.exit(0);
+}
+
+run();
+
 import dotenv from 'dotenv';
 import { connectDatabase } from '../config/db.js';
 import { User } from '../models/User.js';

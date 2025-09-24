@@ -1,5 +1,27 @@
 import dayjs from 'dayjs';
-import { Subscription } from '../models/Subscription.js';
+import Subscription from '../models/Subscription.js';
+import SubscriptionPlan from '../models/SubscriptionPlan.js';
+
+export const getPlans = async (req, res) => {
+  const plans = await SubscriptionPlan.find({ isActive: true }).sort({ price: 1 });
+  res.json({ plans });
+};
+
+export const subscribe = async (req, res) => {
+  const { planId } = req.body;
+  const plan = await SubscriptionPlan.findById(planId);
+  if (!plan) return res.status(404).json({ message: 'Plan not found' });
+  const startDate = new Date();
+  const endDate = dayjs(startDate).add(plan.durationDays, 'day').toDate();
+  const subscription = await Subscription.create({ user: req.user._id, plan: plan._id, startDate, endDate });
+  res.status(201).json({ subscription });
+};
+
+export const mySubscription = async (req, res) => {
+  const subscription = await Subscription.findOne({ user: req.user._id, status: 'active' }).populate('plan');
+  res.json({ subscription });
+};
+
 import { User } from '../models/User.js';
 import { sendEmail } from '../utils/email.js';
 
