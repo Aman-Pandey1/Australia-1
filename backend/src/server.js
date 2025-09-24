@@ -11,6 +11,8 @@ import { Subscription } from './models/Subscription.js';
 import dayjs from 'dayjs';
 import { User } from './models/User.js';
 import { sendEmail } from './utils/email.js';
+import { Page } from './models/Page.js';
+import { Post } from './models/Post.js';
 
 const app = express();
 
@@ -83,6 +85,35 @@ const start = async () => {
     } catch (e) {
         // eslint-disable-next-line no-console
         console.error('[startup] Failed to ensure default admin:', e?.message || e);
+    }
+    // Seed default About page and a sample blog if missing
+    try {
+        const about = await Page.findOne({ slug: 'about' });
+        if (!about) {
+            await Page.create({
+                title: 'About Escortify',
+                slug: 'about',
+                description: 'Escortify® — Better Technology, Smarter Escorts',
+                content: '<p>We are an Australian directory focused on quality, safety, and a delightful user experience. Our team curates listings and features to help audiences discover trustworthy profiles.</p><p>We strive to ensure privacy-first experiences and modern tooling for advertisers.</p>'
+            });
+            // eslint-disable-next-line no-console
+            console.log('[startup] Seeded default About page');
+        }
+        const sample = await Post.findOne({ slug: 'welcome' });
+        if (!sample) {
+            await Post.create({
+                title: 'Welcome to Escortify',
+                slug: 'welcome',
+                description: 'A quick look at features and how to get started',
+                content: '<p>This is a sample post. Use the Admin panel to add more content, update pricing or publish news.</p>',
+                status: 'published'
+            });
+            // eslint-disable-next-line no-console
+            console.log('[startup] Seeded sample blog post');
+        }
+    } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error('[startup] Failed to seed default content:', e?.message || e);
     }
 	// eslint-disable-next-line no-console
 	console.log('[startup] Starting HTTP server on port', env.PORT);
