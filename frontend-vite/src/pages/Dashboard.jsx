@@ -4,7 +4,7 @@ import api from '../lib/api'
 export default function Dashboard() {
     const [subs, setSubs] = useState({ subscription: null, remainingDays: 0 })
     const [listings, setListings] = useState([])
-    const [newListing, setNewListing] = useState({ title: '', description: '', contact: { city: '' } })
+    const [newListing, setNewListing] = useState({ title: '', description: '', price: '', contact: { city: '', address: '', phone: '' }, stats: { age: '' } })
     const [ad, setAd] = useState({ listingId: '', type: 'city', cities: '', priceUsd: 10 })
 
     async function refresh() {
@@ -54,13 +54,34 @@ export default function Dashboard() {
                                 <input className="form-control" value={newListing.contact.city} onChange={(e)=>setNewListing({ ...newListing, contact: { ...newListing.contact, city: e.target.value } })} />
                             </div>
                             <div className="mb-2">
+                                <label className="form-label">Address</label>
+                                <input className="form-control" placeholder="Private | CBD" value={newListing.contact.address} onChange={(e)=>setNewListing({ ...newListing, contact: { ...newListing.contact, address: e.target.value } })} />
+                            </div>
+                            <div className="mb-2">
+                                <label className="form-label">Phone</label>
+                                <input className="form-control" placeholder="04XX XXX XXX" value={newListing.contact.phone} onChange={(e)=>setNewListing({ ...newListing, contact: { ...newListing.contact, phone: e.target.value } })} />
+                            </div>
+                            <div className="row g-2">
+                                <div className="col-6">
+                                    <label className="form-label">Age</label>
+                                    <input className="form-control" type="number" min="18" max="70" value={newListing.stats.age} onChange={(e)=>setNewListing({ ...newListing, stats: { ...newListing.stats, age: e.target.value ? Number(e.target.value) : '' } })} />
+                                </div>
+                                <div className="col-6">
+                                    <label className="form-label">Price per hour (AUD)</label>
+                                    <input className="form-control" type="number" min="0" step="10" value={newListing.price} onChange={(e)=>setNewListing({ ...newListing, price: e.target.value ? Number(e.target.value) : '' })} />
+                                </div>
+                            </div>
+                            <div className="mb-2">
                                 <label className="form-label">Description</label>
                                 <textarea className="form-control" rows={3} value={newListing.description} onChange={(e)=>setNewListing({ ...newListing, description: e.target.value })} />
                             </div>
                             <button className="btn btn-success btn-sm" onClick={async ()=>{
                                 if(!newListing.title) return
-                                await api.post('/listings', newListing)
-                                setNewListing({ title: '', description: '', contact: { city: '' } })
+                                const payload = { ...newListing }
+                                if (payload.price === '') delete payload.price
+                                if (payload.stats && payload.stats.age === '') delete payload.stats.age
+                                await api.post('/listings', payload)
+                                setNewListing({ title: '', description: '', price: '', contact: { city: '', address: '', phone: '' }, stats: { age: '' } })
                                 refresh()
                             }}>Submit for approval</button>
                         </div>
@@ -79,7 +100,8 @@ export default function Dashboard() {
                                                 <div className="fw-semibold">{it.title}</div>
                                                 <span className={`badge ${it.status==='approved'?'text-bg-success':(it.status==='pending'?'text-bg-warning':'text-bg-secondary')}`}>{it.status}</span>
                                             </div>
-                                            <div className="text-muted small">{it.contact?.city || '-'}</div>
+                                            <div className="text-muted small">{it.stats?.age ? `${it.stats.age} yrs` : 'Age private'} • {it.contact?.city || '-'} • {it.contact?.address || 'Private'}</div>
+                                            <div className="text-muted small">{it.contact?.phone || '—'} {it.price ? `• $${it.price}/hr` : ''}</div>
                                         </div>
                                     </div>
                                 ))}

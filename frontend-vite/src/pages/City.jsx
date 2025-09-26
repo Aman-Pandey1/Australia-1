@@ -50,20 +50,22 @@ export default function City() {
                     </select>
                 </div>
             </div>
-			<div className="row g-3">
-				{items.map(it => (
-					<div className="col-6 col-md-3" key={it._id}>
-						<div className="card h-100 shadow-sm">
-							<div className="ratio ratio-1x1 bg-light" style={{ backgroundImage: `url(${it.photos?.[0] || ''})`, backgroundSize: 'cover' }} />
-							<div className="card-body">
-								<div className="fw-semibold">{it.title}</div>
-								<div className="text-muted small">{it.contact?.city}</div>
-							</div>
-						</div>
-					</div>
-				))}
-				{!items.length && <div className="text-muted">No items</div>}
-			</div>
+            <div className="row g-3">
+                {items.map((it, idx) => (
+                    <div className="col-6 col-md-3" key={it._id}>
+                        <div className="card h-100 shadow-sm listing-card">
+                            <div className="ratio ratio-1x1 bg-light" style={{ backgroundImage: `url(${it.photos?.[0] || `https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=1200&q=80&sig=${idx}`})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
+                            <div className="card-body">
+                                <div className="fw-semibold text-truncate">{it.title}</div>
+                                <div className="text-muted small">{it.stats?.age ? `${it.stats.age} yrs` : 'Age private'} • {it.contact?.city || city} • {it.contact?.address || 'Private'}</div>
+                                <div className="text-muted small">{it.contact?.phone || '04XX XXX XXX'}</div>
+                                {it.price && <div className="small"><span className="badge-vip">${it.price} / hour</span></div>}
+                            </div>
+                        </div>
+                    </div>
+                ))}
+                {!items.length && <div className="text-muted">No items</div>}
+            </div>
 		</div>
 	)
 }

@@ -58,10 +58,18 @@ export async function listListings(req, res) {
 
 export async function setListingStatus(req, res) {
 	const { id } = req.params;
-	const { status } = req.body; // approved | rejected | pending
+  const { status, premium } = req.body; // approved | rejected | pending; optional premium payload
     const listing = await Listing.findById(id).populate('owner', 'email name');
 	if (!listing) return res.status(404).json({ message: 'Not found' });
 	listing.status = status;
+  if (premium && typeof premium === 'object') {
+    listing.premium = listing.premium || {};
+    if (premium.level) listing.premium.level = premium.level;
+    if (premium.cities) listing.premium.cities = premium.cities;
+    if (premium.showOnHomepage !== undefined) listing.premium.showOnHomepage = premium.showOnHomepage;
+    if (premium.startsAt) listing.premium.startsAt = premium.startsAt;
+    if (premium.expiresAt) listing.premium.expiresAt = premium.expiresAt;
+  }
 	await listing.save();
     try {
         const ownerEmail = listing?.owner?.email;
