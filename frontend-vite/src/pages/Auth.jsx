@@ -17,11 +17,11 @@ export function Login() {
 					<form onSubmit={onSubmit}>
 						<div className="mb-3">
 							<label className="form-label">Email</label>
-							<input className="form-control" value={email} onChange={(e) => setEmail(e.target.value)} />
+							<input type="email" required className="form-control" value={email} onChange={(e) => setEmail(e.target.value)} />
 						</div>
 						<div className="mb-3">
 							<label className="form-label">Password</label>
-							<input type="password" className="form-control" value={password} onChange={(e) => setPassword(e.target.value)} />
+							<input type="password" required minLength={6} className="form-control" value={password} onChange={(e) => setPassword(e.target.value)} />
 						</div>
 						<button className="btn btn-primary w-100">Login</button>
 					</form>
@@ -50,11 +50,11 @@ export function Register() {
 						</div>
 						<div className="mb-3">
 							<label className="form-label">Email</label>
-							<input className="form-control" value={values.email} onChange={(e) => setValues({ ...values, email: e.target.value })} />
+							<input type="email" required className="form-control" value={values.email} onChange={(e) => setValues({ ...values, email: e.target.value })} />
 						</div>
 						<div className="mb-3">
 							<label className="form-label">Password</label>
-							<input type="password" className="form-control" value={values.password} onChange={(e) => setValues({ ...values, password: e.target.value })} />
+							<input type="password" required minLength={6} className="form-control" value={values.password} onChange={(e) => setValues({ ...values, password: e.target.value })} />
 						</div>
 						<div className="mb-3">
 							<label className="form-label">Register as</label>

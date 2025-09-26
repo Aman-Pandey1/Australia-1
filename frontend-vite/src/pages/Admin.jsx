@@ -6,6 +6,7 @@ export default function Admin() {
     const [pendingListings, setPendingListings] = useState([])
     const [pendingAds, setPendingAds] = useState([])
     const [users, setUsers] = useState([])
+    const [allListings, setAllListings] = useState([])
     const [posts, setPosts] = useState([])
     const [pages, setPages] = useState([])
     const [editingPost, setEditingPost] = useState(null)
@@ -15,6 +16,7 @@ export default function Admin() {
         refreshQueues()
         refreshUsers()
         refreshCms()
+        refreshAllListings()
 	}, [])
 
     async function refreshQueues() {
@@ -31,6 +33,12 @@ export default function Admin() {
         try {
             const { data } = await api.get('/admin/users')
             setUsers(data.users || [])
+        } catch {}
+    }
+    async function refreshAllListings() {
+        try {
+            const { data } = await api.get('/admin/listings')
+            setAllListings(data.listings || [])
         } catch {}
     }
     async function refreshCms() {
@@ -73,6 +81,43 @@ export default function Admin() {
                         </div>
                     ))}
                     {!pendingListings.length && <div className="text-muted">No pending listings.</div>}
+                </div>
+            </div>
+
+            <div className="mt-4">
+                <h2 className="h5 mb-2">All Listings</h2>
+                <div className="table-responsive">
+                    <table className="table table-sm align-middle">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>City</th>
+                                <th>Status</th>
+                                <th>Tier</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {allListings.map(l => (
+                                <tr key={l._id}>
+                                    <td className="fw-semibold">{l.title}</td>
+                                    <td className="text-muted small">{l.contact?.city || '-'}</td>
+                                    <td>
+                                        <span className={`badge ${l.status==='approved'?'text-bg-success':(l.status==='pending'?'text-bg-warning':'text-bg-secondary')}`}>{l.status}</span>
+                                    </td>
+                                    <td>
+                                        <TierBadge level={l?.premium?.level || 'none'} />
+                                    </td>
+                                    <td className="text-end">
+                                        <TierEditor listing={l} onSaved={refreshAllListings} />
+                                    </td>
+                                </tr>
+                            ))}
+                            {!allListings.length && (
+                                <tr><td colSpan={5} className="text-muted">No listings</td></tr>
+                            )}
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
@@ -199,6 +244,49 @@ function Card({ title, value }) {
 			</div>
 		</div>
 	)
+}
+
+function TierBadge({ level }) {
+    const map = {
+        none: { text: 'Free', cls: 'text-bg-secondary' },
+        featured: { text: 'Featured', cls: 'text-bg-info' },
+        premium: { text: 'Premium', cls: 'text-bg-primary' },
+        vip: { text: 'Diamond', cls: 'text-bg-warning' },
+    }
+    const cur = map[level] || map.none
+    return <span className={`badge ${cur.cls}`}>{cur.text}</span>
+}
+
+function TierEditor({ listing, onSaved }) {
+    const [level, setLevel] = useState(listing?.premium?.level || 'none')
+    const [cities, setCities] = useState((listing?.premium?.cities || []).join(', '))
+    const [saving, setSaving] = useState(false)
+    async function save() {
+        setSaving(true)
+        const payload = { status: listing.status, premium: { level } }
+        if (level === 'featured' || level === 'premium') {
+            const arr = cities.split(',').map(s=>s.trim()).filter(Boolean)
+            if (arr.length) payload.premium.cities = arr
+        }
+        if (level === 'vip') payload.premium.showOnHomepage = true
+        await api.patch(`/admin/listings/${listing._id}/status`, payload)
+        setSaving(false)
+        onSaved?.()
+    }
+    return (
+        <div className="d-flex gap-2 align-items-center justify-content-end">
+            <select className="form-select form-select-sm w-auto" value={level} onChange={(e)=>setLevel(e.target.value)}>
+                <option value="none">Free</option>
+                <option value="featured">Featured (city)</option>
+                <option value="premium">Premium (multi-city)</option>
+                <option value="vip">Diamond (VIP)</option>
+            </select>
+            {(level==='featured' || level==='premium') && (
+                <input className="form-control form-control-sm" style={{ maxWidth: 260 }} placeholder="Cities (comma separated)" value={cities} onChange={(e)=>setCities(e.target.value)} />
+            )}
+            <button className="btn btn-sm btn-primary" disabled={saving} onClick={save}>{saving ? 'Saving...' : 'Save'}</button>
+        </div>
+    )
 }
 
 function Editor({ type, value, onClose, onSaved }) {

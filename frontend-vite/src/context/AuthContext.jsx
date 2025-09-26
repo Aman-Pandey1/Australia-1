@@ -36,55 +36,67 @@ export function AuthProvider({ children }) {
 		hydrate()
 	}, [])
 
-	async function login(email, password) {
-		const { data } = await api.post('/auth/login', { email, password })
-		// Some backends return token+user, others only set cookie
-		if (data?.token) {
-			localStorage.setItem('token', data.token)
-			setToken(data.token)
-		}
-		if (data?.user) {
-			localStorage.setItem('user', JSON.stringify(data.user))
-			setUser(data.user)
-		} else {
-			try {
-				const me = await api.get('/auth/me')
-				if (me.data?.user) {
-					localStorage.setItem('user', JSON.stringify(me.data.user))
-					setUser(me.data.user)
-				}
-			} catch {}
-		}
-		toast.success('Logged in')
-		const role = ((data?.user?.role) || 'user').toLowerCase()
-		if (role === 'admin') {
-			navigate('/admin')
-		} else {
-			navigate('/')
-		}
-	}
+    async function login(email, password) {
+        try {
+            const { data } = await api.post('/auth/login', { email, password })
+            // Some backends return token+user, others only set cookie
+            if (data?.token) {
+                localStorage.setItem('token', data.token)
+                setToken(data.token)
+            }
+            if (data?.user) {
+                localStorage.setItem('user', JSON.stringify(data.user))
+                setUser(data.user)
+            } else {
+                try {
+                    const me = await api.get('/auth/me')
+                    if (me.data?.user) {
+                        localStorage.setItem('user', JSON.stringify(me.data.user))
+                        setUser(me.data.user)
+                    }
+                } catch {}
+            }
+            toast.success('Logged in')
+            const role = ((data?.user?.role) || 'user').toLowerCase()
+            if (role === 'admin') {
+                navigate('/admin')
+            } else {
+                navigate('/')
+            }
+        } catch (err) {
+            const msg = err?.response?.data?.message || err?.response?.data?.errors?.[0]?.msg || 'Login failed'
+            toast.error(msg)
+            throw err
+        }
+    }
 
-	async function register(payload) {
-		const { data } = await api.post('/auth/register', payload)
-		if (data?.token) {
-			localStorage.setItem('token', data.token)
-			setToken(data.token)
-		}
-		if (data?.user) {
-			localStorage.setItem('user', JSON.stringify(data.user))
-			setUser(data.user)
-		} else {
-			try {
-				const me = await api.get('/auth/me')
-				if (me.data?.user) {
-					localStorage.setItem('user', JSON.stringify(me.data.user))
-					setUser(me.data.user)
-				}
-			} catch {}
-		}
-		toast.success('Account created')
-		navigate('/')
-	}
+    async function register(payload) {
+        try {
+            const { data } = await api.post('/auth/register', payload)
+            if (data?.token) {
+                localStorage.setItem('token', data.token)
+                setToken(data.token)
+            }
+            if (data?.user) {
+                localStorage.setItem('user', JSON.stringify(data.user))
+                setUser(data.user)
+            } else {
+                try {
+                    const me = await api.get('/auth/me')
+                    if (me.data?.user) {
+                        localStorage.setItem('user', JSON.stringify(me.data.user))
+                        setUser(me.data.user)
+                    }
+                } catch {}
+            }
+            toast.success('Account created')
+            navigate('/')
+        } catch (err) {
+            const msg = err?.response?.data?.message || err?.response?.data?.errors?.[0]?.msg || 'Registration failed'
+            toast.error(msg)
+            throw err
+        }
+    }
 
 	function logout() {
 		localStorage.removeItem('token')
