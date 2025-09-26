@@ -12,38 +12,76 @@ export function AuthProvider({ children }) {
 	const [loading, setLoading] = useState(true)
 
 	useEffect(() => {
-		try {
-			const storedToken = localStorage.getItem('token')
-			const storedUser = localStorage.getItem('user')
-			if (storedToken && storedUser) {
-				setToken(storedToken)
-				setUser(JSON.parse(storedUser))
+		async function hydrate() {
+			try {
+				const storedToken = localStorage.getItem('token')
+				const storedUser = localStorage.getItem('user')
+				if (storedToken && storedUser) {
+					setToken(storedToken)
+					setUser(JSON.parse(storedUser))
+				}
+				// Also try to hydrate from cookie-based session if present
+				if (!storedUser) {
+					const { data } = await api.get('/auth/me')
+					if (data?.user) {
+						setUser(data.user)
+					}
+				}
+			} catch {
+				// ignore
+			} finally {
+				setLoading(false)
 			}
-		} finally {
-			setLoading(false)
 		}
+		hydrate()
 	}, [])
 
 	async function login(email, password) {
 		const { data } = await api.post('/auth/login', { email, password })
-		localStorage.setItem('token', data.token)
-		localStorage.setItem('user', JSON.stringify(data.user))
-		setToken(data.token)
-		setUser(data.user)
+		// Some backends return token+user, others only set cookie
+		if (data?.token) {
+			localStorage.setItem('token', data.token)
+			setToken(data.token)
+		}
+		if (data?.user) {
+			localStorage.setItem('user', JSON.stringify(data.user))
+			setUser(data.user)
+		} else {
+			try {
+				const me = await api.get('/auth/me')
+				if (me.data?.user) {
+					localStorage.setItem('user', JSON.stringify(me.data.user))
+					setUser(me.data.user)
+				}
+			} catch {}
+		}
 		toast.success('Logged in')
-    if (data.user?.role === 'admin') {
-        navigate('/admin')
-    } else {
-        navigate('/')
-    }
+		const role = ((data?.user?.role) || 'user').toLowerCase()
+		if (role === 'admin') {
+			navigate('/admin')
+		} else {
+			navigate('/')
+		}
 	}
 
 	async function register(payload) {
 		const { data } = await api.post('/auth/register', payload)
-		localStorage.setItem('token', data.token)
-		localStorage.setItem('user', JSON.stringify(data.user))
-		setToken(data.token)
-		setUser(data.user)
+		if (data?.token) {
+			localStorage.setItem('token', data.token)
+			setToken(data.token)
+		}
+		if (data?.user) {
+			localStorage.setItem('user', JSON.stringify(data.user))
+			setUser(data.user)
+		} else {
+			try {
+				const me = await api.get('/auth/me')
+				if (me.data?.user) {
+					localStorage.setItem('user', JSON.stringify(me.data.user))
+					setUser(me.data.user)
+				}
+			} catch {}
+		}
 		toast.success('Account created')
 		navigate('/')
 	}
