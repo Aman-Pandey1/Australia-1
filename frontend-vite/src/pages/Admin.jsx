@@ -69,16 +69,7 @@ export default function Admin() {
                 <div className="row g-2">
                     {pendingListings.map(l => (
                         <div className="col-md-6" key={l._id}>
-                            <div className="border rounded p-3 d-flex justify-content-between align-items-center">
-                                <div>
-                                    <div className="fw-semibold">{l.title}</div>
-                                    <div className="text-muted small">{l.contact?.city || '-'}</div>
-                                </div>
-                                <div className="d-flex gap-2">
-                                    <button className="btn btn-sm btn-outline-danger" onClick={async ()=>{ await api.patch(`/admin/listings/${l._id}/status`, { status: 'rejected' }); refreshQueues() }}>Reject</button>
-                                    <button className="btn btn-sm btn-success" onClick={async ()=>{ await api.patch(`/admin/listings/${l._id}/status`, { status: 'approved' }); refreshQueues() }}>Approve</button>
-                                </div>
-                            </div>
+                            <ApproveCard listing={l} onDone={refreshQueues} />
                         </div>
                     ))}
                     {!pendingListings.length && <div className="text-muted">No pending listings.</div>}
@@ -259,6 +250,53 @@ function Editor({ type, value, onClose, onSaved }) {
                     </div>
                 </div>
             </form>
+        </div>
+    )
+}
+
+function ApproveCard({ listing, onDone }) {
+    const [premium, setPremium] = useState({ level: 'none', cities: '', showOnHomepage: false })
+    async function approve(status) {
+        const payload = { status }
+        if (status === 'approved') {
+            const p = { ...premium }
+            if (p.cities) p.cities = p.cities.split(',').map(s=>s.trim()).filter(Boolean)
+            payload.premium = { level: p.level }
+            if (p.level === 'vip') payload.premium.showOnHomepage = true
+            if (Array.isArray(p.cities)) payload.premium.cities = p.cities
+        }
+        await api.patch(`/admin/listings/${listing._id}/status`, payload)
+        onDone?.()
+    }
+    return (
+        <div className="border rounded p-3">
+            <div className="d-flex justify-content-between align-items-center mb-2">
+                <div>
+                    <div className="fw-semibold">{listing.title}</div>
+                    <div className="text-muted small">{listing.contact?.city || '-'}</div>
+                </div>
+                <div className="d-flex gap-2">
+                    <button className="btn btn-sm btn-outline-danger" onClick={()=>approve('rejected')}>Reject</button>
+                    <button className="btn btn-sm btn-success" onClick={()=>approve('approved')}>Approve</button>
+                </div>
+            </div>
+            <div className="row g-2">
+                <div className="col-md-4">
+                    <label className="form-label">Premium level</label>
+                    <select className="form-select form-select-sm" value={premium.level} onChange={(e)=>setPremium({ ...premium, level: e.target.value })}>
+                        <option value="none">Free</option>
+                        <option value="featured">Featured (city)</option>
+                        <option value="premium">Premium (multi-city)</option>
+                        <option value="vip">Diamond (VIP)</option>
+                    </select>
+                </div>
+                {(premium.level === 'featured' || premium.level === 'premium') && (
+                    <div className="col-md-8">
+                        <label className="form-label">Cities (comma separated)</label>
+                        <input className="form-control form-control-sm" placeholder="Sydney, Melbourne" value={premium.cities} onChange={(e)=>setPremium({ ...premium, cities: e.target.value })} />
+                    </div>
+                )}
+            </div>
         </div>
     )
 }

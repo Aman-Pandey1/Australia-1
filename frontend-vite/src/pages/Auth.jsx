@@ -33,7 +33,7 @@ export function Login() {
 
 export function Register() {
 	const { register } = useAuth()
-	const [values, setValues] = useState({ email: '', password: '', name: '' })
+	const [values, setValues] = useState({ email: '', password: '', name: '', accountType: 'user' })
 	async function onSubmit(e) {
 		e.preventDefault()
 		await register(values)
@@ -41,7 +41,7 @@ export function Register() {
 	return (
 		<div className="container py-5">
 			<div className="row justify-content-center">
-				<div className="col-md-5">
+				<div className="col-md-6">
 					<h1 className="h3 mb-3">Register</h1>
 					<form onSubmit={onSubmit}>
 						<div className="mb-3">
@@ -55,6 +55,19 @@ export function Register() {
 						<div className="mb-3">
 							<label className="form-label">Password</label>
 							<input type="password" className="form-control" value={values.password} onChange={(e) => setValues({ ...values, password: e.target.value })} />
+						</div>
+						<div className="mb-3">
+							<label className="form-label">Register as</label>
+							<div className="d-flex gap-3">
+								<div className="form-check">
+									<input className="form-check-input" type="radio" name="accountType" id="asUser" checked={values.accountType === 'user'} onChange={() => setValues({ ...values, accountType: 'user' })} />
+									<label className="form-check-label" htmlFor="asUser">User</label>
+								</div>
+								<div className="form-check">
+									<input className="form-check-input" type="radio" name="accountType" id="asAgent" checked={values.accountType === 'agent'} onChange={() => setValues({ ...values, accountType: 'agent' })} />
+									<label className="form-check-label" htmlFor="asAgent">Agent (manage multiple escorts)</label>
+								</div>
+							</div>
 						</div>
 						<button className="btn btn-primary w-100">Create account</button>
 					</form>
