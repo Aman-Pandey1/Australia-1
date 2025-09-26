@@ -1,14 +1,38 @@
 import { validationResult } from 'express-validator';
 import dayjs from 'dayjs';
 import { Listing } from '../models/Listing.js';
+import { Subscription } from '../models/Subscription.js';
+import { env } from '../config/env.js';
 
 export async function createListing(req, res) {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
+  // Parse optional nested JSON strings coming from multipart/form-data
+  let contact = req.body.contact;
+  let stats = req.body.stats;
+  try { if (typeof contact === 'string') contact = JSON.parse(contact); } catch { /* ignored */ }
+  try { if (typeof stats === 'string') stats = JSON.parse(stats); } catch { /* ignored */ }
+
+  // Coerce numeric fields
+  const price = req.body.price !== undefined && req.body.price !== '' ? Number(req.body.price) : undefined;
+  if (stats && stats.age !== undefined && stats.age !== '') stats.age = Number(stats.age);
+
+  // Images uploaded via multer
+  const uploaded = Array.isArray(req.files) ? req.files : [];
+  const photos = uploaded.map((f) => `${env.publicUrl.replace(/\/$/, '')}/uploads/${f.filename}`);
+
+  const ownerId = (req.user.role === 'admin' && req.body.owner) ? req.body.owner : req.user.id;
+
   const payload = {
-    ...req.body,
-    owner: req.user.id,
-    status: 'pending',
+    title: req.body.title,
+    description: req.body.description || '',
+    owner: ownerId,
+    contact,
+    stats,
+    photos,
+    price,
+    status: env.autoApproveListings ? 'approved' : 'pending',
   };
   const listing = await Listing.create(payload);
   return res.status(201).json({ listing });
@@ -21,7 +45,22 @@ export async function updateListing(req, res) {
   if (String(listing.owner) !== req.user.id && req.user.role !== 'admin') {
     return res.status(403).json({ message: 'Forbidden' });
   }
-  Object.assign(listing, req.body);
+  // Allow updating details; if files uploaded, append to photos
+  const payload = { ...req.body };
+  let contact = payload.contact;
+  let stats = payload.stats;
+  try { if (typeof contact === 'string') contact = JSON.parse(contact); } catch {}
+  try { if (typeof stats === 'string') stats = JSON.parse(stats); } catch {}
+  if (contact) listing.contact = contact;
+  if (stats) listing.stats = stats;
+  if (payload.title) listing.title = payload.title;
+  if (payload.description !== undefined) listing.description = payload.description;
+  if (payload.price !== undefined && payload.price !== '') listing.price = Number(payload.price);
+  const uploaded = Array.isArray(req.files) ? req.files : [];
+  if (uploaded.length) {
+    const photos = uploaded.map((f) => `${env.publicUrl.replace(/\/$/, '')}/uploads/${f.filename}`);
+    listing.photos = [...(listing.photos || []), ...photos];
+  }
   await listing.save();
   return res.json({ listing });
 }
@@ -59,7 +98,7 @@ export async function homepageSections(_req, res) {
     Listing.find({ status: 'approved', 'premium.level': { $in: ['featured', 'premium'] }, $or: [ { 'premium.expiresAt': { $gt: now } }, { 'premium.expiresAt': null } ] })
       .sort({ 'premium.level': -1, createdAt: -1 })
       .limit(12),
-    Listing.find({ status: 'approved', 'premium.level': { $in: [null, 'none'] } })
+    Listing.find({ status: 'approved', $or: [ { 'premium.level': { $in: [null, 'none'] } }, { premium: { $exists: false } } ] })
       .sort({ createdAt: -1 })
       .limit(12),
     Listing.find({ status: 'approved', 'premium.level': { $in: ['featured', 'vip', 'premium'] }, $or: [ { 'premium.expiresAt': { $gt: now } }, { 'premium.expiresAt': null } ] })
@@ -95,5 +134,28 @@ export async function categoryListings(req, res) {
   if (premium === 'free') where['premium.level'] = { $in: [null, 'none'] };
   const listings = await Listing.find(where).sort({ 'premium.level': -1, createdAt: -1 });
   return res.json({ listings });
+}
+
+// Promote listing to VIP (homepage) if user has an active subscription
+export async function promoteListing(req, res) {
+  const { id } = req.params;
+  const listing = await Listing.findById(id);
+  if (!listing) return res.status(404).json({ message: 'Not found' });
+  if (String(listing.owner) !== req.user.id && req.user.role !== 'admin') {
+    return res.status(403).json({ message: 'Forbidden' });
+  }
+  // Check subscription
+  const now = dayjs();
+  const activeSub = await Subscription.findOne({ user: req.user.id, status: 'active', expiresAt: { $gt: now.toDate() } });
+  if (!activeSub && req.user.role !== 'admin') {
+    return res.status(402).json({ message: 'Active subscription required' });
+  }
+  listing.premium = listing.premium || {};
+  listing.premium.level = 'vip';
+  listing.premium.startsAt = now.toDate();
+  listing.premium.expiresAt = now.add(30, 'day').toDate();
+  listing.premium.showOnHomepage = true;
+  await listing.save();
+  return res.json({ listing });
 }
 

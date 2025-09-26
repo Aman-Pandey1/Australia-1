@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom'
 import { useTheme } from '../context/ThemeContext'
+import { useAuth } from '../context/AuthContext'
 
 export default function Topbar() {
     const { theme, toggleTheme } = useTheme()
+    const { user } = useAuth()
     return (
         <div className="topbar">
             <div className="container d-flex align-items-center justify-content-between py-1">
@@ -22,8 +24,9 @@ export default function Topbar() {
                         <a href="#" aria-label="Instagram" className="text-decoration-none text-light"><i className="bi bi-instagram" /></a>
                         <a href="#" aria-label="Facebook" className="text-decoration-none text-light"><i className="bi bi-facebook" /></a>
                     </div>
-                    <Link to="/login" className="link-light text-decoration-none">Login</Link>
-                    <Link to="/register" className="btn btn-sm btn-primary">Add advertisement</Link>
+                    {!user && <Link to="/login" className="link-light text-decoration-none">Login</Link>}
+                    {!user && <Link to="/register" className="btn btn-sm btn-primary">Add advertisement</Link>}
+                    {user && <Link to="/dashboard" className="btn btn-sm btn-primary">My account</Link>}
                 </div>
             </div>
         </div>

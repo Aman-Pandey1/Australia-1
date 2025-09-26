@@ -34,6 +34,15 @@ export function AuthProvider({ children }) {
 			}
 		}
 		hydrate()
+
+    function beforeUnload(e) {
+        if (localStorage.getItem('user')) {
+            e.preventDefault()
+            e.returnValue = ''
+        }
+    }
+    window.addEventListener('beforeunload', beforeUnload)
+    return () => window.removeEventListener('beforeunload', beforeUnload)
 	}, [])
 
     async function login(email, password) {
