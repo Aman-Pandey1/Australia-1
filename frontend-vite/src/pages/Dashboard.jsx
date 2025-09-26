@@ -1,10 +1,14 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import api from '../lib/api'
+import { useAuth } from '../context/AuthContext'
 
 export default function Dashboard() {
+    const { user, token } = useAuth()
     const [subs, setSubs] = useState({ subscription: null, remainingDays: 0 })
     const [listings, setListings] = useState([])
     const [newListing, setNewListing] = useState({ title: '', description: '', price: '', contact: { city: '', address: '', phone: '' }, stats: { age: '' } })
+    const [images, setImages] = useState([])
+    const imagePreviews = useMemo(() => images.map(f => URL.createObjectURL(f)), [images])
     const [ad, setAd] = useState({ listingId: '', type: 'city', cities: '', priceUsd: 10 })
 
     async function refresh() {
@@ -27,6 +31,21 @@ export default function Dashboard() {
                 <div className="small text-secondary">Welcome back</div>
             </div>
             <div className="row g-3">
+                <div className="col-md-6">
+                    <div className="card shadow-sm h-100">
+                        <div className="card-body">
+                            <div className="d-flex align-items-center gap-3">
+                                <div className="rounded-circle" style={{ width: 56, height: 56, backgroundSize: 'cover', backgroundPosition: 'center', backgroundImage: `url(${(user && user.avatarUrl) || 'https://api.dicebear.com/7.x/initials/svg?seed='+(user?.name||'User')})` }} />
+                                <div>
+                                    <div className="fw-semibold">{user?.name || 'Your name'}</div>
+                                    <div className="text-muted small">{user?.email}</div>
+                                </div>
+                            </div>
+                            <hr />
+                            <ProfileEditor onSaved={async()=>{ try{ const { data } = await api.get('/auth/me'); localStorage.setItem('user', JSON.stringify(data.user)); window.location.reload(); }catch{} }} />
+                        </div>
+                    </div>
+                </div>
                 <div className="col-md-6">
                     <div className="card shadow-sm h-100">
                         <div className="card-body">
@@ -78,13 +97,29 @@ export default function Dashboard() {
                                 <label className="form-label">Description</label>
                                 <textarea className="form-control" rows={3} value={newListing.description} onChange={(e)=>setNewListing({ ...newListing, description: e.target.value })} />
                             </div>
+                            <div className="mb-2">
+                                <label className="form-label">Photos</label>
+                                <input className="form-control" type="file" multiple accept="image/*" onChange={(e)=>setImages(Array.from(e.target.files || []))} />
+                                {!!imagePreviews.length && (
+                                    <div className="d-flex gap-2 mt-2 flex-wrap">
+                                        {imagePreviews.map((src, i) => (
+                                            <div key={i} className="rounded overflow-hidden" style={{ width: 84, height: 84, backgroundSize: 'cover', backgroundPosition: 'center', backgroundImage: `url(${src})` }} />
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                             <button className="btn btn-success btn-sm" onClick={async ()=>{
                                 if(!newListing.title) return
-                                const payload = { ...newListing }
-                                if (payload.price === '') delete payload.price
-                                if (payload.stats && payload.stats.age === '') delete payload.stats.age
-                                await api.post('/listings', payload)
+                                const form = new FormData()
+                                form.append('title', newListing.title)
+                                if (newListing.description) form.append('description', newListing.description)
+                                form.append('contact', JSON.stringify(newListing.contact))
+                                form.append('stats', JSON.stringify({ ...newListing.stats, age: newListing.stats.age || '' }))
+                                if (newListing.price !== '') form.append('price', String(newListing.price))
+                                images.forEach((f) => form.append('images', f))
+                                await api.post('/listings', form, { headers: { 'Content-Type': 'multipart/form-data' } })
                                 setNewListing({ title: '', description: '', price: '', contact: { city: '', address: '', phone: '' }, stats: { age: '' } })
+                                setImages([])
                                 refresh()
                             }}>Submit for approval</button>
                         </div>
@@ -161,6 +196,33 @@ export default function Dashboard() {
                     </div>
                 </div>
             </div>
+        </div>
+    )
+}
+
+function ProfileEditor({ onSaved }) {
+    const [name, setName] = useState('')
+    const [avatar, setAvatar] = useState(null)
+    const [preview, setPreview] = useState('')
+    useEffect(() => { if (avatar) setPreview(URL.createObjectURL(avatar)); else setPreview('') }, [avatar])
+    return (
+        <div>
+            <div className="mb-2">
+                <label className="form-label">Display name</label>
+                <input className="form-control" value={name} onChange={(e)=>setName(e.target.value)} placeholder="Your name" />
+            </div>
+            <div className="mb-2">
+                <label className="form-label">Avatar</label>
+                <input className="form-control" type="file" accept="image/*" onChange={(e)=>setAvatar((e.target.files||[])[0]||null)} />
+                {!!preview && <div className="mt-2 rounded" style={{ width: 84, height: 84, backgroundImage: `url(${preview})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />}
+            </div>
+            <button className="btn btn-sm btn-primary" onClick={async()=>{
+                const form = new FormData()
+                if (name) form.append('name', name)
+                if (avatar) form.append('avatar', avatar)
+                await api.patch('/auth/profile', form, { headers: { 'Content-Type': 'multipart/form-data' } })
+                onSaved?.()
+            }}>Save profile</button>
         </div>
     )
 }

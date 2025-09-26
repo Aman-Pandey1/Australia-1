@@ -44,11 +44,18 @@ export default function Navbar() {
                             <a href="#" aria-label="Facebook" className="nav-link px-2 opacity-75"><i className="bi bi-facebook" /></a>
                         </li>
                         {user ? (
-                            <>
-                                <li className="nav-item"><NavLink to="/dashboard" className="nav-link">Dashboard</NavLink></li>
-                                {user.role === 'admin' && <li className="nav-item"><NavLink to="/admin" className="nav-link">Admin</NavLink></li>}
-                                <li className="nav-item"><button onClick={logout} className="btn btn-sm btn-outline-secondary ms-lg-2">Logout</button></li>
-                            </>
+                            <li className="nav-item dropdown">
+                                <a className="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" id="account" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <span className="rounded-circle" style={{ width: 24, height: 24, backgroundImage: `url(${user.avatarUrl || 'https://api.dicebear.com/7.x/initials/svg?seed='+(user?.name||'U')})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
+                                    <span className="d-none d-lg-inline">Account</span>
+                                </a>
+                                <ul className="dropdown-menu dropdown-menu-dark dropdown-menu-end" aria-labelledby="account">
+                                    <li><NavLink className="dropdown-item" to="/dashboard">Dashboard</NavLink></li>
+                                    {user.role === 'admin' && <li><NavLink className="dropdown-item" to="/admin">Admin</NavLink></li>}
+                                    <li><hr className="dropdown-divider" /></li>
+                                    <li><button className="dropdown-item" onClick={logout}>Logout</button></li>
+                                </ul>
+                            </li>
                         ) : (
                             <>
                                 <li className="nav-item"><NavLink to="/login" className="nav-link">Login</NavLink></li>

@@ -46,3 +46,15 @@ export async function logout(_req, res) {
   return res.json({ message: 'Logged out' });
 }
 
+export async function updateProfile(req, res) {
+  const user = await User.findById(req.user.id);
+  if (!user) return res.status(404).json({ message: 'Not found' });
+  const { name } = req.body;
+  if (name !== undefined) user.name = name;
+  if (req.file) {
+    user.avatarUrl = `${env.publicUrl.replace(/\/$/, '')}/uploads/${req.file.filename}`;
+  }
+  await user.save();
+  return res.json({ user: { id: user._id, email: user.email, name: user.name, role: user.role, avatarUrl: user.avatarUrl } });
+}
+

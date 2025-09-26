@@ -24,6 +24,8 @@ export const env = {
   jwtSecret: process.env.JWT_SECRET || 'change_this_secret',
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
   clientUrl: process.env.CLIENT_URL || 'http://localhost:5173',
+  publicUrl: process.env.PUBLIC_URL || process.env.SERVER_PUBLIC_URL || 'http://localhost:4000',
+  autoApproveListings: String(process.env.AUTO_APPROVE_LISTINGS || 'true') === 'true',
   smtpHost: process.env.SMTP_HOST || '',
   smtpPort: Number(process.env.SMTP_PORT || 587),
   smtpUser: process.env.SMTP_USER || '',

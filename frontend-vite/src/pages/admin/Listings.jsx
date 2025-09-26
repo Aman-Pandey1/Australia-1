@@ -45,6 +45,10 @@ export default function AdminListings() {
     const [status, setStatus] = useState('')
     const [city, setCity] = useState('')
     const [loading, setLoading] = useState(false)
+    const [createMode, setCreateMode] = useState(false)
+    const [allUsers, setAllUsers] = useState([])
+    const [payload, setPayload] = useState({ owner: '', title: '', description: '', contact: { city: '' }, price: '', stats: { age: '' } })
+    const [images, setImages] = useState([])
 
     async function refresh() {
         setLoading(true)
@@ -57,7 +61,7 @@ export default function AdminListings() {
         } finally { setLoading(false) }
     }
 
-    useEffect(() => { refresh() }, [])
+    useEffect(() => { refresh(); (async()=>{ try{ const { data } = await api.get('/admin/users'); setAllUsers(data.users||[]) }catch{} })() }, [])
 
     const cities = useMemo(() => Array.from(new Set(items.map(i => i.contact?.city).filter(Boolean))).sort(), [items])
 
@@ -107,6 +111,65 @@ export default function AdminListings() {
                     </div>
                 </div>
             </div>
+            <div className="mt-3 d-flex justify-content-end">
+                <button className="btn btn-success" onClick={()=>setCreateMode(true)}>Create listing</button>
+            </div>
+
+            {createMode && (
+                <div className="modal fade show" style={{ display: 'block', background: 'rgba(0,0,0,.5)' }}>
+                    <div className="modal-dialog modal-lg">
+                        <div className="modal-content">
+                            <div className="modal-header"><div className="modal-title">Create listing</div><button className="btn-close" onClick={()=>setCreateMode(false)}></button></div>
+                            <div className="modal-body">
+                                <div className="row g-2">
+                                    <div className="col-md-6">
+                                        <label className="form-label">Owner</label>
+                                        <select className="form-select" value={payload.owner} onChange={(e)=>setPayload({ ...payload, owner: e.target.value })}>
+                                            <option value="">Select user</option>
+                                            {allUsers.map(u => <option key={u._id} value={u._id}>{u.email}</option>)}
+                                        </select>
+                                    </div>
+                                    <div className="col-md-6">
+                                        <label className="form-label">Title</label>
+                                        <input className="form-control" value={payload.title} onChange={(e)=>setPayload({ ...payload, title: e.target.value })} />
+                                    </div>
+                                    <div className="col-md-6">
+                                        <label className="form-label">City</label>
+                                        <input className="form-control" value={payload.contact.city} onChange={(e)=>setPayload({ ...payload, contact: { ...payload.contact, city: e.target.value } })} />
+                                    </div>
+                                    <div className="col-md-6">
+                                        <label className="form-label">Price</label>
+                                        <input className="form-control" type="number" value={payload.price} onChange={(e)=>setPayload({ ...payload, price: e.target.value })} />
+                                    </div>
+                                    <div className="col-12">
+                                        <label className="form-label">Description</label>
+                                        <textarea className="form-control" rows={3} value={payload.description} onChange={(e)=>setPayload({ ...payload, description: e.target.value })} />
+                                    </div>
+                                    <div className="col-12">
+                                        <label className="form-label">Photos</label>
+                                        <input className="form-control" type="file" multiple accept="image/*" onChange={(e)=>setImages(Array.from(e.target.files||[]))} />
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="modal-footer">
+                                <button className="btn btn-secondary" onClick={()=>setCreateMode(false)}>Cancel</button>
+                                <button className="btn btn-primary" onClick={async()=>{
+                                    if(!payload.title || !payload.owner) return
+                                    const form = new FormData()
+                                    form.append('title', payload.title)
+                                    form.append('description', payload.description)
+                                    form.append('owner', payload.owner)
+                                    form.append('contact', JSON.stringify(payload.contact))
+                                    if (payload.price) form.append('price', String(payload.price))
+                                    images.forEach(f => form.append('images', f))
+                                    await api.post('/listings', form, { headers: { 'Content-Type': 'multipart/form-data' } })
+                                    setCreateMode(false); setPayload({ owner: '', title: '', description: '', contact: { city: '' }, price: '', stats: { age: '' } }); setImages([]); refresh()
+                                }}>Create</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </AdminLayout>
     )
 }
