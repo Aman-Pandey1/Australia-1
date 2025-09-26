@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import api from '../lib/api'
+import AdminLayout from './admin/AdminLayout'
 
 export default function Admin() {
 	const [stats, setStats] = useState(null)
@@ -56,20 +57,19 @@ export default function Admin() {
         await refreshUsers()
     }
 	return (
-		<div className="container py-4">
-			<h1 className="h3 mb-4">Admin Panel</h1>
+		<AdminLayout title="Dashboard">
 			{!stats ? (
 				<div className="text-muted">Loading...</div>
 			) : (
 				<div className="row g-3">
-					<Card title="Users" value={stats.users} />
-					<Card title="Listings Pending" value={stats.listingsPending} />
-					<Card title="Listings Approved" value={stats.listingsApproved} />
-					<Card title="Reviews Pending" value={stats.reviewsPending} />
-					<Card title="Comments Pending" value={stats.commentsPending} />
-					<Card title="Reports Pending" value={stats.reportsPending} />
-					<Card title="Ads Pending" value={stats.adsPending} />
-					<Card title="Active Subs" value={stats.subsActive} />
+					<Card title="Users" value={stats.users} to="/admin/users" />
+					<Card title="Listings Pending" value={stats.listingsPending} to="/admin/listings?filter=pending" />
+					<Card title="Listings Approved" value={stats.listingsApproved} to="/admin/listings?filter=approved" />
+					<Card title="Reviews Pending" value={stats.reviewsPending} to="/admin/reviews" />
+					<Card title="Comments Pending" value={stats.commentsPending} to="/admin/comments" />
+					<Card title="Reports Pending" value={stats.reportsPending} to="/admin/reports" />
+					<Card title="Ads Pending" value={stats.adsPending} to="/admin/ads" />
+					<Card title="Active Subs" value={stats.subsActive} to="/admin/subscriptions" />
 				</div>
 			)}
             <div className="mt-4">
@@ -229,19 +229,28 @@ export default function Admin() {
                 </div>
                 {editingPage && <Editor type="page" value={editingPage} onClose={()=>setEditingPage(null)} onSaved={()=>{ setEditingPage(null); refreshCms() }} />}
             </div>
-        </div>
+		</AdminLayout>
 	)
 }
 
-function Card({ title, value }) {
+function Card({ title, value, to }) {
 	return (
 		<div className="col-6 col-md-3">
-			<div className="card shadow-sm">
-				<div className="card-body">
-					<div className="text-muted text-uppercase small">{title}</div>
-					<div className="h4 m-0">{value}</div>
+			<a href={to || '#'} className="text-decoration-none text-reset">
+				<div className="card border-0 shadow-sm card-hover">
+					<div className="card-body">
+						<div className="d-flex align-items-center justify-content-between">
+							<div>
+								<div className="text-uppercase small opacity-75">{title}</div>
+								<div className="h4 m-0 fw-bold">{value}</div>
+							</div>
+							<div className="rounded-circle d-flex align-items-center justify-content-center" style={{ width: 36, height: 36, background: 'rgba(13,110,253,0.12)' }}>
+								<i className="bi bi-arrow-right-short fs-4 text-primary" />
+							</div>
+						</div>
+					</div>
 				</div>
-			</div>
+			</a>
 		</div>
 	)
 }

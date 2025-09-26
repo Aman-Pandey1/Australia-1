@@ -15,6 +15,13 @@ import Category from './pages/Category'
 import Admin from './pages/Admin'
 import Dashboard from './pages/Dashboard'
 import { Login, Register } from './pages/Auth'
+import AdminUsers from './pages/admin/Users'
+import AdminListings from './pages/admin/Listings'
+import AdminAds from './pages/admin/Ads'
+import AdminReviews from './pages/admin/Reviews'
+import AdminComments from './pages/admin/Comments'
+import AdminReports from './pages/admin/Reports'
+import AdminSubscriptions from './pages/admin/Subscriptions'
 
 function AppLayout({ children }) {
 	return (
@@ -44,7 +51,14 @@ export default function App() {
 					<Route path="/register" element={<Register />} />
 					<Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
 					<Route path="/admin" element={<ProtectedRoute roles={["admin"]}><Admin /></ProtectedRoute>} />
-				</Routes>
+                    <Route path="/admin/users" element={<ProtectedRoute roles={["admin"]}><AdminUsers /></ProtectedRoute>} />
+                    <Route path="/admin/listings" element={<ProtectedRoute roles={["admin"]}><AdminListings /></ProtectedRoute>} />
+                    <Route path="/admin/ads" element={<ProtectedRoute roles={["admin"]}><AdminAds /></ProtectedRoute>} />
+                    <Route path="/admin/reviews" element={<ProtectedRoute roles={["admin"]}><AdminReviews /></ProtectedRoute>} />
+                    <Route path="/admin/comments" element={<ProtectedRoute roles={["admin"]}><AdminComments /></ProtectedRoute>} />
+                    <Route path="/admin/reports" element={<ProtectedRoute roles={["admin"]}><AdminReports /></ProtectedRoute>} />
+                    <Route path="/admin/subscriptions" element={<ProtectedRoute roles={["admin"]}><AdminSubscriptions /></ProtectedRoute>} />
+					</Routes>
 			</AppLayout>
 		</AuthProvider>
 	)
