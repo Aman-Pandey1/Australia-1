@@ -12,8 +12,20 @@ export default function Home() {
 	}, [])
 
 	// Fallback image + sample data helpers (for testing without backend images)
-	const sampleCities = ['Sydney','Melbourne','Brisbane','Perth','Adelaide','Canberra']
-	const getFallbackImage = (i) => `https://picsum.photos/seed/escortify${i}/800/800`
+    const sampleCities = ['Sydney','Melbourne','Brisbane','Perth','Adelaide','Canberra']
+    const femalePortraits = [
+        'https://images.unsplash.com/photo-1524504388940-b1c1722653e1',
+        'https://images.unsplash.com/photo-1520975930461-d2e3b2b1e2e2',
+        'https://images.unsplash.com/photo-1544005313-94ddf0286df2',
+        'https://images.unsplash.com/photo-1520975614850-1a4ddc1f14d1',
+        'https://images.unsplash.com/photo-1525134479668-1bee5c7c6845',
+        'https://images.unsplash.com/photo-1513377881742-5a16a2b3e483',
+        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d',
+        'https://images.unsplash.com/photo-1544723795-3fb6469f5b39',
+        'https://images.unsplash.com/photo-1520813792240-56fc4a3765a7',
+        'https://images.unsplash.com/photo-1503342217505-b0a15cf70489'
+    ]
+    const getFallbackImage = (i) => femalePortraits[i % femalePortraits.length] + '?auto=format&fit=crop&w=900&q=80'
 	const buildSampleListing = (i) => ({ _id: `sample-${i}`, slug: `sample-${i}`, title: `Sample profile ${i + 1}`, photos: [getFallbackImage(i)], contact: { city: sampleCities[i % sampleCities.length] } })
 	const sampleListings = (count) => Array.from({ length: count }, (_, i) => buildSampleListing(i))
 	const heroData = (homepageAds && homepageAds.length ? homepageAds : sampleListings(10).map((l, i) => ({ _id: `hero-${i}`, listing: l })))

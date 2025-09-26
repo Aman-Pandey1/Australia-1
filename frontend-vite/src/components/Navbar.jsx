@@ -1,8 +1,10 @@
 import { Link, NavLink } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { useTheme } from '../context/ThemeContext'
 
 export default function Navbar() {
     const { user, logout } = useAuth()
+    const { theme, toggleTheme } = useTheme()
     return (
         <nav className="navbar navbar-expand-lg navbar-dark navbar-dark shadow-sm navbar-blur sticky-top">
             <div className="container py-2">
@@ -27,6 +29,13 @@ export default function Navbar() {
                                     <li key={c}><NavLink className="dropdown-item" to={`/city/${encodeURIComponent(c)}`}>{c}</NavLink></li>
                                 ))}
                             </ul>
+                        </li>
+                        {/* Theme toggle */}
+                        <li className="nav-item d-flex align-items-center ms-2">
+                            <button onClick={toggleTheme} className="btn btn-sm btn-outline-secondary d-flex align-items-center gap-2" aria-label="Toggle theme">
+                                <i className={theme === 'dark' ? 'bi bi-moon-stars' : 'bi bi-brightness-high'} />
+                                <span className="d-none d-lg-inline">{theme === 'dark' ? 'Dark' : 'Light'}</span>
+                            </button>
                         </li>
                         {/* Social icons */}
                         <li className="nav-item d-none d-lg-flex align-items-center gap-1 ms-2">

@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* Theme variables */
-:root {
+:root[data-theme="dark"], :root:not([data-theme]) {
   --color-bg: #0b0c0f;
   --color-panel: #111318;
   --color-surface: #161a22;
@@ -10,6 +10,17 @@
   --color-muted: #a7adbb;
   --color-primary: #ff2e63; /* accent pink */
   --color-gold: #f7b500;
+}
+
+:root[data-theme="light"] {
+  --color-bg: #f7f7fb;
+  --color-panel: #ffffff;
+  --color-surface: #ffffff;
+  --color-border: #e5e7ef;
+  --color-text: #0b0c0f;
+  --color-muted: #5b6170;
+  --color-primary: #e91e63;
+  --color-gold: #cf9d00;
 }
 
 html, body, #root { height: 100%; }
@@ -26,7 +37,8 @@ body {
 }
 
 /* Cards */
-.card { background: var(--color-panel); border: 1px solid var(--color-border); border-radius: 10px; overflow: hidden; }
+.card { background: var(--color-panel); border: 1px solid var(--color-border); border-radius: 12px; overflow: hidden; transition: transform .15s ease, box-shadow .15s ease; }
+.card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.18); }
 .card .card-body { color: var(--color-text); }
 
 /* Navbar dark */
@@ -41,6 +53,7 @@ body {
 
 /* Topbar */
 .topbar { background: #0a0b0f; border-bottom: 1px solid var(--color-border); }
+.topbar [data-theme="light"] & { background: #ffffff; }
 .topbar .btn-primary { padding: 2px 10px; }
 
 /* Buttons */

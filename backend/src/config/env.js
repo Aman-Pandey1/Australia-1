@@ -1,13 +1,19 @@
 import dotenv from 'dotenv';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 
-try {
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = path.dirname(__filename);
-  const backendEnvPath = path.resolve(__dirname, '../../.env');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const backendEnvPath = path.resolve(__dirname, '../../.env');
+const rootEnvPath = path.resolve(__dirname, '../../../.env');
+
+// Prefer backend/.env if present; otherwise fall back to project root .env
+if (fs.existsSync(backendEnvPath)) {
   dotenv.config({ path: backendEnvPath });
-} catch {
+} else if (fs.existsSync(rootEnvPath)) {
+  dotenv.config({ path: rootEnvPath });
+} else {
   dotenv.config();
 }
 
