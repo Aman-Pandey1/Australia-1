@@ -13,11 +13,11 @@ function signToken(user) {
 export async function register(req, res) {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
-  const { email, password, name } = req.body;
+  const { email, password, name, accountType } = req.body;
   const exists = await User.findOne({ email });
   if (exists) return res.status(400).json({ message: 'Email already in use' });
   const passwordHash = await bcrypt.hash(password, 10);
-  const user = await User.create({ email, passwordHash, name });
+  const user = await User.create({ email, passwordHash, name, accountType: ['user','agent'].includes(accountType) ? accountType : 'user', role: email === env.adminEmail ? 'admin' : 'user' });
   const token = signToken(user);
   res.cookie('token', token, { httpOnly: true, sameSite: 'lax' });
   return res.json({ user: { id: user._id, email: user.email, name: user.name, role: user.role }, token });

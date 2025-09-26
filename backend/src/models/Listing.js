@@ -5,6 +5,7 @@ const ContactSchema = new mongoose.Schema(
   {
     city: { type: String, index: true },
     country: { type: String, index: true },
+    address: { type: String },
     phone: String,
     whatsapp: String,
     telegram: String,
@@ -44,6 +45,7 @@ const ListingSchema = new mongoose.Schema(
     slug: { type: String, unique: true, index: true },
     description: { type: String, default: '' },
     photos: [{ type: String }],
+    price: { type: Number, min: 0 },
     categories: [{ type: String, index: true }],
     contact: ContactSchema,
     stats: StatsSchema,

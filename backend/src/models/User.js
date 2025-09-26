@@ -7,6 +7,8 @@ const userSchema = new mongoose.Schema(
     email: { type: String, required: true, unique: true, lowercase: true },
     passwordHash: { type: String, required: true },
     role: { type: String, enum: ['user', 'admin'], default: 'user' },
+    // Distinguish between a normal end-user and an agent who can manage multiple escorts
+    accountType: { type: String, enum: ['user', 'agent'], default: 'user', index: true },
     avatarUrl: { type: String },
     cities: [{ type: String }],
     isPremium: { type: Boolean, default: false },
