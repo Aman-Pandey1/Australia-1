@@ -4,11 +4,11 @@ import { useAuth } from '../context/AuthContext'
 export default function Navbar() {
     const { user, logout } = useAuth()
     return (
-        <nav className="navbar navbar-expand-lg navbar-dark navbar-dark shadow-sm">
+        <nav className="navbar navbar-expand-lg navbar-dark navbar-dark shadow-sm navbar-blur sticky-top">
             <div className="container py-2">
-                <Link to="/" className="navbar-brand d-flex align-items-center gap-2 fw-extrabold">
-                    <span className="d-inline-block rounded-circle" style={{ width: 28, height: 28, background: 'var(--color-primary)' }}></span>
-                    <span>escortify</span>
+                <Link to="/" className="navbar-brand d-flex align-items-center gap-2 fw-bold text-uppercase">
+                    <span className="d-inline-block rounded-circle" style={{ width: 28, height: 28, background: 'linear-gradient(135deg, var(--color-primary), #ff6b9a)' }}></span>
+                    <span>Escortify</span>
                 </Link>
                 <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav" aria-expanded="false" aria-label="Toggle navigation">
                     <span className="navbar-toggler-icon"></span>
@@ -16,8 +16,11 @@ export default function Navbar() {
                 <div className="collapse navbar-collapse" id="nav">
                     <ul className="navbar-nav ms-auto align-items-lg-center mb-2 mb-lg-0 gap-lg-2">
                         <li className="nav-item"><NavLink to="/" className="nav-link">Home</NavLink></li>
+                        <li className="nav-item"><NavLink to="/about" className="nav-link">About</NavLink></li>
+                        <li className="nav-item"><NavLink to="/blogs" className="nav-link">Blog</NavLink></li>
+                        <li className="nav-item"><NavLink to="/contact" className="nav-link">Contact</NavLink></li>
                         {/* Cities dropdown */}
-                        <li className="nav-item dropdown">
+                        <li className="nav-item dropdown d-none d-lg-block">
                             <a className="nav-link dropdown-toggle" href="#" id="cities" role="button" data-bs-toggle="dropdown" aria-expanded="false">Cities</a>
                             <ul className="dropdown-menu dropdown-menu-dark" aria-labelledby="cities">
                                 {['Sydney','Melbourne','Brisbane','Perth','Adelaide','Canberra'].map((c) => (
@@ -25,17 +28,12 @@ export default function Navbar() {
                                 ))}
                             </ul>
                         </li>
-                        {/* Categories dropdown */}
-                        <li className="nav-item dropdown">
-                            <a className="nav-link dropdown-toggle" href="#" id="cats" role="button" data-bs-toggle="dropdown" aria-expanded="false">Categories</a>
-                            <ul className="dropdown-menu dropdown-menu-dark" aria-labelledby="cats">
-                                {['Escort','Massage','Agency','Independent','GFE','BDSM'].map((k) => (
-                                    <li key={k}><NavLink className="dropdown-item" to={`/category/${encodeURIComponent(k)}`}>{k}</NavLink></li>
-                                ))}
-                            </ul>
+                        {/* Social icons */}
+                        <li className="nav-item d-none d-lg-flex align-items-center gap-1 ms-2">
+                            <a href="#" aria-label="Twitter" className="nav-link px-2 opacity-75"><i className="bi bi-twitter-x" /></a>
+                            <a href="#" aria-label="Instagram" className="nav-link px-2 opacity-75"><i className="bi bi-instagram" /></a>
+                            <a href="#" aria-label="Facebook" className="nav-link px-2 opacity-75"><i className="bi bi-facebook" /></a>
                         </li>
-                        <li className="nav-item"><NavLink to="/blogs" className="nav-link">Blogs</NavLink></li>
-                        <li className="nav-item"><NavLink to="/contact" className="nav-link">Contact</NavLink></li>
                         {user ? (
                             <>
                                 <li className="nav-item"><NavLink to="/dashboard" className="nav-link">Dashboard</NavLink></li>

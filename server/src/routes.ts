@@ -16,6 +16,19 @@ router.post('/auth/signup', async (req, res) => {
 	return res.status(201).json({ ok: true })
 })
 
+// Compatibility: allow /auth/register to behave like signup
+router.post('/auth/register', async (req, res) => {
+    const { name, email, password } = req.body as { name?: string; email: string; password: string }
+    if (!email || !password) return res.status(400).json({ message: 'Email and password required' })
+    const existing = await prisma.user.findUnique({ where: { email } })
+    if (existing) return res.status(409).json({ message: 'Email already in use' })
+    const passwordHash = await bcrypt.hash(password, 10)
+    const user = await prisma.user.create({ data: { name: name || null, email, password: passwordHash, role: 'USER', profile: { create: {} } } })
+    const token = signToken({ sub: user.id, role: user.role })
+    res.cookie('token', token, { httpOnly: true, sameSite: 'lax' })
+    return res.json({ user: { id: user.id, email: user.email, name: user.name, role: user.role }, token })
+})
+
 router.post('/auth/login', async (req, res) => {
 	const { email, password } = req.body as { email: string; password: string }
 	const user = await prisma.user.findUnique({ where: { email } })
