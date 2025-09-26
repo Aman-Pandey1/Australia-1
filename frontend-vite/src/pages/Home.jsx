@@ -25,8 +25,8 @@ export default function Home() {
         'https://images.unsplash.com/photo-1520813792240-56fc4a3765a7',
         'https://images.unsplash.com/photo-1503342217505-b0a15cf70489'
     ]
-    const getFallbackImage = (i) => femalePortraits[i % femalePortraits.length] + '?auto=format&fit=crop&w=900&q=80'
-	const buildSampleListing = (i) => ({ _id: `sample-${i}`, slug: `sample-${i}`, title: `Sample profile ${i + 1}`, photos: [getFallbackImage(i)], contact: { city: sampleCities[i % sampleCities.length] } })
+    const getFallbackImage = (i) => femalePortraits[i % femalePortraits.length] + '?auto=format&fit=crop&w=1200&q=80'
+	const buildSampleListing = (i) => ({ _id: `sample-${i}`, slug: `sample-${i}`, title: `Melody ${i + 1}`, photos: [getFallbackImage(i)], stats: { age: 22 + (i % 10) }, contact: { city: sampleCities[i % sampleCities.length], address: 'Private | CBD', phone: '04XX XXX XXX' }, price: 350 })
 	const sampleListings = (count) => Array.from({ length: count }, (_, i) => buildSampleListing(i))
 	const heroData = (homepageAds && homepageAds.length ? homepageAds : sampleListings(10).map((l, i) => ({ _id: `hero-${i}`, listing: l })))
     const featuredData = (data.featured && data.featured.length ? data.featured : sampleListings(8))
@@ -37,6 +37,27 @@ export default function Home() {
 
 	return (
 		<div className="container py-4" style={{ backgroundImage: 'radial-gradient(1200px 600px at 100% -10%, rgba(255,46,99,.12), rgba(255,46,99,0)), radial-gradient(800px 400px at -10% 10%, rgba(83,109,254,.12), rgba(83,109,254,0))' }}>
+			{/* Banner */}
+			<section className="mb-5">
+				<div className="position-relative overflow-hidden rounded-4" style={{ background: 'linear-gradient(120deg, rgba(255,46,99,.18), rgba(83,109,254,.18))' }}>
+					<div className="row align-items-center">
+						<div className="col-12 col-lg-6 p-4 p-lg-5">
+							<h1 className="display-6 fw-bold mb-2">Find Australian escorts near you</h1>
+							<p className="text-secondary mb-3">Browse VIP, Premium and Free ads from Sydney, Melbourne, Brisbane and more. Verified profiles, modern UI, and fast search.</p>
+							<div className="d-flex gap-2">
+								<Link to="/city/Sydney" className="btn btn-primary">Browse Sydney</Link>
+								<Link to="/city/Melbourne" className="btn btn-outline-secondary">Browse Melbourne</Link>
+							</div>
+						</div>
+						<div className="col-12 col-lg-6 p-0 d-none d-lg-block">
+							<div className="ratio-1x1" style={{ paddingTop: '56%' }}>
+								<div className="bg-cover" style={{ backgroundImage: `url(${getFallbackImage(3)})` }}></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+
 			{/* Hero VIP scroll row */}
 			<section className="mb-4">
 				<div className="d-flex align-items-center justify-content-between mb-2">
@@ -135,6 +156,24 @@ export default function Home() {
 				</div>
 			</section>
 
+			{/* By city quick links */}
+			<section className="mb-5">
+				<h2 className="section-title h5 mb-2">Browse by city</h2>
+				<div className="scroll-row">
+					{['Sydney','Melbourne','Brisbane','Perth','Adelaide','Canberra','Gold Coast','Hobart'].map((c, idx) => (
+						<Link key={c} to={`/city/${encodeURIComponent(c)}`} className="card text-decoration-none text-reset">
+							<div className="ratio-1x1">
+								<div className="bg-cover" style={{ backgroundImage: `url(${getFallbackImage(idx)})` }}></div>
+							</div>
+							<div className="card-body">
+								<div className="fw-semibold">{c}</div>
+								<div className="small text-secondary">Escorts in {c}</div>
+							</div>
+						</Link>
+					))}
+				</div>
+			</section>
+
 			{/* Normal (Free) grid */}
 			<section className="mb-5">
                 <h2 className="section-title h5 mb-2">Latest Australian escorts and adult entertainers</h2>
@@ -150,13 +189,20 @@ export default function Home() {
 								</Link>
 								<div className="card-body">
 									<div className="fw-semibold text-truncate">{it.title}</div>
-									<div className="small text-secondary">{it.contact?.city}</div>
+									<div className="small text-secondary">{it.stats?.age ? `${it.stats.age} yrs` : 'Age private'} • {it.contact?.city || 'City'} • {it.contact?.address || 'Private'}</div>
+									<div className="small text-secondary">{it.contact?.phone || '04XX XXX XXX'}</div>
+									<div className="small"><span className="badge-vip">${it.price || 350} / hour</span></div>
 								</div>
 							</div>
 						</div>
 					))}
                     {!(freeData || []).length && <div className="text-secondary">No items</div>}
 				</div>
+			</section>
+
+			{/* SEO text */}
+			<section className="mb-4">
+				<p className="text-secondary small">Escortify is Australia’s modern adult directory. Discover independent escorts and agencies with verified profiles, transparent pricing and availability. Browse by city, compare features and chat directly.</p>
 			</section>
 
 			{/* About + FAQ */}
