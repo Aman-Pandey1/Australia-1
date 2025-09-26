@@ -32,6 +32,9 @@ export default function Dashboard() {
                         <div className="card-body">
                             <div className="fw-semibold mb-1">Subscription</div>
                             <div className="text-muted small">Remaining days: {subs.remainingDays}</div>
+                            {!!subs?.subscription?.expiresAt && (
+                                <div className="text-muted small">Expires on: {new Date(subs.subscription.expiresAt).toLocaleDateString()}</div>
+                            )}
                             <div className="mt-3 d-flex gap-2">
                                 <button className="btn btn-outline-secondary btn-sm" onClick={async () => { await api.post('/subscriptions/recharge', { months: 1 }); refresh() }}>1 month</button>
                                 <button className="btn btn-outline-secondary btn-sm" onClick={async () => { await api.post('/subscriptions/recharge', { months: 3 }); refresh() }}>3 months</button>

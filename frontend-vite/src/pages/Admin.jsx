@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
 import api from '../lib/api'
+import AdminLayout from './admin/AdminLayout'
 
 export default function Admin() {
 	const [stats, setStats] = useState(null)
     const [pendingListings, setPendingListings] = useState([])
     const [pendingAds, setPendingAds] = useState([])
     const [users, setUsers] = useState([])
+    const [allListings, setAllListings] = useState([])
     const [posts, setPosts] = useState([])
     const [pages, setPages] = useState([])
     const [editingPost, setEditingPost] = useState(null)
@@ -15,6 +17,7 @@ export default function Admin() {
         refreshQueues()
         refreshUsers()
         refreshCms()
+        refreshAllListings()
 	}, [])
 
     async function refreshQueues() {
@@ -33,6 +36,12 @@ export default function Admin() {
             setUsers(data.users || [])
         } catch {}
     }
+    async function refreshAllListings() {
+        try {
+            const { data } = await api.get('/admin/listings')
+            setAllListings(data.listings || [])
+        } catch {}
+    }
     async function refreshCms() {
         try {
             const [{ data: postsData }, { data: pagesData }] = await Promise.all([
@@ -48,20 +57,19 @@ export default function Admin() {
         await refreshUsers()
     }
 	return (
-		<div className="container py-4">
-			<h1 className="h3 mb-4">Admin Panel</h1>
+		<AdminLayout title="Dashboard">
 			{!stats ? (
 				<div className="text-muted">Loading...</div>
 			) : (
 				<div className="row g-3">
-					<Card title="Users" value={stats.users} />
-					<Card title="Listings Pending" value={stats.listingsPending} />
-					<Card title="Listings Approved" value={stats.listingsApproved} />
-					<Card title="Reviews Pending" value={stats.reviewsPending} />
-					<Card title="Comments Pending" value={stats.commentsPending} />
-					<Card title="Reports Pending" value={stats.reportsPending} />
-					<Card title="Ads Pending" value={stats.adsPending} />
-					<Card title="Active Subs" value={stats.subsActive} />
+					<Card title="Users" value={stats.users} to="/admin/users" />
+					<Card title="Listings Pending" value={stats.listingsPending} to="/admin/listings?filter=pending" />
+					<Card title="Listings Approved" value={stats.listingsApproved} to="/admin/listings?filter=approved" />
+					<Card title="Reviews Pending" value={stats.reviewsPending} to="/admin/reviews" />
+					<Card title="Comments Pending" value={stats.commentsPending} to="/admin/comments" />
+					<Card title="Reports Pending" value={stats.reportsPending} to="/admin/reports" />
+					<Card title="Ads Pending" value={stats.adsPending} to="/admin/ads" />
+					<Card title="Active Subs" value={stats.subsActive} to="/admin/subscriptions" />
 				</div>
 			)}
             <div className="mt-4">
@@ -73,6 +81,43 @@ export default function Admin() {
                         </div>
                     ))}
                     {!pendingListings.length && <div className="text-muted">No pending listings.</div>}
+                </div>
+            </div>
+
+            <div className="mt-4">
+                <h2 className="h5 mb-2">All Listings</h2>
+                <div className="table-responsive">
+                    <table className="table table-sm align-middle">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>City</th>
+                                <th>Status</th>
+                                <th>Tier</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {allListings.map(l => (
+                                <tr key={l._id}>
+                                    <td className="fw-semibold">{l.title}</td>
+                                    <td className="text-muted small">{l.contact?.city || '-'}</td>
+                                    <td>
+                                        <span className={`badge ${l.status==='approved'?'text-bg-success':(l.status==='pending'?'text-bg-warning':'text-bg-secondary')}`}>{l.status}</span>
+                                    </td>
+                                    <td>
+                                        <TierBadge level={l?.premium?.level || 'none'} />
+                                    </td>
+                                    <td className="text-end">
+                                        <TierEditor listing={l} onSaved={refreshAllListings} />
+                                    </td>
+                                </tr>
+                            ))}
+                            {!allListings.length && (
+                                <tr><td colSpan={5} className="text-muted">No listings</td></tr>
+                            )}
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
@@ -184,21 +229,73 @@ export default function Admin() {
                 </div>
                 {editingPage && <Editor type="page" value={editingPage} onClose={()=>setEditingPage(null)} onSaved={()=>{ setEditingPage(null); refreshCms() }} />}
             </div>
-        </div>
+		</AdminLayout>
 	)
 }
 
-function Card({ title, value }) {
+function Card({ title, value, to }) {
 	return (
 		<div className="col-6 col-md-3">
-			<div className="card shadow-sm">
-				<div className="card-body">
-					<div className="text-muted text-uppercase small">{title}</div>
-					<div className="h4 m-0">{value}</div>
+			<a href={to || '#'} className="text-decoration-none text-reset">
+				<div className="card border-0 shadow-sm card-hover">
+					<div className="card-body">
+						<div className="d-flex align-items-center justify-content-between">
+							<div>
+								<div className="text-uppercase small opacity-75">{title}</div>
+								<div className="h4 m-0 fw-bold">{value}</div>
+							</div>
+							<div className="rounded-circle d-flex align-items-center justify-content-center" style={{ width: 36, height: 36, background: 'rgba(13,110,253,0.12)' }}>
+								<i className="bi bi-arrow-right-short fs-4 text-primary" />
+							</div>
+						</div>
+					</div>
 				</div>
-			</div>
+			</a>
 		</div>
 	)
+}
+
+function TierBadge({ level }) {
+    const map = {
+        none: { text: 'Free', cls: 'text-bg-secondary' },
+        featured: { text: 'Featured', cls: 'text-bg-info' },
+        premium: { text: 'Premium', cls: 'text-bg-primary' },
+        vip: { text: 'Diamond', cls: 'text-bg-warning' },
+    }
+    const cur = map[level] || map.none
+    return <span className={`badge ${cur.cls}`}>{cur.text}</span>
+}
+
+function TierEditor({ listing, onSaved }) {
+    const [level, setLevel] = useState(listing?.premium?.level || 'none')
+    const [cities, setCities] = useState((listing?.premium?.cities || []).join(', '))
+    const [saving, setSaving] = useState(false)
+    async function save() {
+        setSaving(true)
+        const payload = { status: listing.status, premium: { level } }
+        if (level === 'featured' || level === 'premium') {
+            const arr = cities.split(',').map(s=>s.trim()).filter(Boolean)
+            if (arr.length) payload.premium.cities = arr
+        }
+        if (level === 'vip') payload.premium.showOnHomepage = true
+        await api.patch(`/admin/listings/${listing._id}/status`, payload)
+        setSaving(false)
+        onSaved?.()
+    }
+    return (
+        <div className="d-flex gap-2 align-items-center justify-content-end">
+            <select className="form-select form-select-sm w-auto" value={level} onChange={(e)=>setLevel(e.target.value)}>
+                <option value="none">Free</option>
+                <option value="featured">Featured (city)</option>
+                <option value="premium">Premium (multi-city)</option>
+                <option value="vip">Diamond (VIP)</option>
+            </select>
+            {(level==='featured' || level==='premium') && (
+                <input className="form-control form-control-sm" style={{ maxWidth: 260 }} placeholder="Cities (comma separated)" value={cities} onChange={(e)=>setCities(e.target.value)} />
+            )}
+            <button className="btn btn-sm btn-primary" disabled={saving} onClick={save}>{saving ? 'Saving...' : 'Save'}</button>
+        </div>
+    )
 }
 
 function Editor({ type, value, onClose, onSaved }) {
