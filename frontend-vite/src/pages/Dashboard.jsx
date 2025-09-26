@@ -22,7 +22,10 @@ export default function Dashboard() {
 
     return (
         <div className="container py-4">
-            <h1 className="h3 mb-3">My Dashboard</h1>
+            <div className="d-flex justify-content-between align-items-center mb-3">
+                <h1 className="h3 m-0">My Dashboard</h1>
+                <div className="small text-secondary">Welcome back</div>
+            </div>
             <div className="row g-3">
                 <div className="col-md-6">
                     <div className="card shadow-sm h-100">

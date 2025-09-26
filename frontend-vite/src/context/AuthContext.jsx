@@ -56,7 +56,7 @@ export function AuthProvider({ children }) {
 			} catch {}
 		}
 		toast.success('Logged in')
-		const role = (data?.user?.role) || 'user'
+		const role = ((data?.user?.role) || 'user').toLowerCase()
 		if (role === 'admin') {
 			navigate('/admin')
 		} else {

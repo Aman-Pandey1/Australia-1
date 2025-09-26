@@ -7,10 +7,15 @@ export default function Footer() {
                 <div className="row g-4">
                     <div className="col-12 col-md-4">
                         <div className="d-flex align-items-center gap-2 mb-2">
-                            <div className="d-inline-block rounded-circle" style={{ width: 28, height: 28, background: 'var(--color-primary)' }}></div>
-                            <div className="fw-bold fs-4 text-white">escortify</div>
+                            <div className="d-inline-block rounded-circle" style={{ width: 28, height: 28, background: 'linear-gradient(135deg, var(--color-primary), #ff6b9a)' }}></div>
+                            <div className="fw-bold fs-4 text-white text-uppercase">Escortify</div>
                         </div>
-                        <div className="small">Escortify® - Better Technology, Smarter Escorts</div>
+                        <div className="small text-secondary mb-3">Escortify® — Better Technology, Smarter Escorts</div>
+                        <div className="d-flex align-items-center gap-2">
+                            <a href="#" aria-label="Twitter" className="text-decoration-none text-secondary"><i className="bi bi-twitter-x" /></a>
+                            <a href="#" aria-label="Instagram" className="text-decoration-none text-secondary"><i className="bi bi-instagram" /></a>
+                            <a href="#" aria-label="Facebook" className="text-decoration-none text-secondary"><i className="bi bi-facebook" /></a>
+                        </div>
                     </div>
                     <div className="col-6 col-md-3">
                         <div className="text-white fw-semibold mb-2">Navigation</div>
