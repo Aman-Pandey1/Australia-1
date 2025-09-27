@@ -45,8 +45,10 @@ export default function Navbar() {
                         </li>
                         {user ? (
                             <>
-                                {/* Primary CTA goes to dashboard when logged in */}
-                                <li className="nav-item d-none d-lg-block"><NavLink to="/dashboard" className="btn btn-sm btn-primary ms-lg-2">Add advertisement</NavLink></li>
+                                {/* Only agents can add advertisement (multi listing). Normal users manage profile only */}
+                                {user.accountType === 'agent' && (
+                                    <li className="nav-item d-none d-lg-block"><NavLink to="/dashboard" className="btn btn-sm btn-primary ms-lg-2">Add advertisement</NavLink></li>
+                                )}
                                 {/* Mobile-visible Logout (outside dropdown) */}
                                 <li className="nav-item d-lg-none"><button className="nav-link btn btn-link px-2" onClick={logout}>Logout</button></li>
                                 <li className="nav-item dropdown">

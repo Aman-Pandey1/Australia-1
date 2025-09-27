@@ -46,6 +46,19 @@ export async function setUserRole(req, res) {
 	return res.json({ user: { id: user._id, email: user.email, name: user.name, role: user.role } });
 }
 
+export async function setUserAccountType(req, res) {
+    const { id } = req.params;
+    const { accountType } = req.body; // 'user' | 'agent'
+    if (!['user','agent'].includes(String(accountType))) {
+        return res.status(400).json({ message: 'Invalid accountType' });
+    }
+    const user = await User.findById(id);
+    if (!user) return res.status(404).json({ message: 'Not found' });
+    user.accountType = accountType;
+    await user.save();
+    return res.json({ user: { id: user._id, email: user.email, name: user.name, role: user.role, accountType: user.accountType } });
+}
+
 // Listings
 export async function listListings(req, res) {
 	const { status, city } = req.query;
