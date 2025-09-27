@@ -1,9 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import api from '../lib/api'
 import { useAuth } from '../context/AuthContext'
 
 export default function Dashboard() {
     const { user, token } = useAuth()
+    const navigate = useNavigate()
+    const isAgent = (user?.accountType === 'agent')
     const [subs, setSubs] = useState({ subscription: null, remainingDays: 0 })
     const [listings, setListings] = useState([])
     const [newListing, setNewListing] = useState({ title: '', description: '', price: '', contact: { city: '', address: '', phone: '' }, stats: { age: '' } })
@@ -23,6 +26,9 @@ export default function Dashboard() {
     }
 
     useEffect(() => { refresh() }, [])
+    useEffect(() => {
+        if (user?.role === 'admin') navigate('/admin', { replace: true })
+    }, [user])
 
     return (
         <div className="container py-4">
@@ -42,6 +48,10 @@ export default function Dashboard() {
                                 </div>
                             </div>
                             <hr />
+                            <div className="d-flex align-items-center gap-2 small mb-2">
+                                <span className="badge text-bg-secondary">{isAgent ? 'Agent account' : 'User account'}</span>
+                                {isAgent ? <span className="text-muted">Create and manage multiple profiles</span> : <span className="text-muted">Manage your single profile</span>}
+                            </div>
                             <ProfileEditor onSaved={async()=>{ try{ const { data } = await api.get('/auth/me'); localStorage.setItem('user', JSON.stringify(data.user)); window.location.reload(); }catch{} }} />
                         </div>
                     </div>
@@ -66,7 +76,7 @@ export default function Dashboard() {
                 <div className="col-md-6">
                     <div className="card shadow-sm h-100">
                         <div className="card-body">
-                            <div className="fw-semibold mb-2">Add Listing</div>
+                            <div className="fw-semibold mb-2">{isAgent ? 'Add Profile' : 'Add Listing'}</div>
                             <div className="mb-2">
                                 <label className="form-label">Title</label>
                                 <input className="form-control" value={newListing.title} onChange={(e)=>setNewListing({ ...newListing, title: e.target.value })} />
@@ -121,7 +131,7 @@ export default function Dashboard() {
                                 setNewListing({ title: '', description: '', price: '', contact: { city: '', address: '', phone: '' }, stats: { age: '' } })
                                 setImages([])
                                 refresh()
-                            }}>Submit for approval</button>
+                            }}>{isAgent ? 'Submit profile' : 'Submit for approval'}</button>
                         </div>
                     </div>
                 </div>
@@ -129,7 +139,7 @@ export default function Dashboard() {
                 <div className="col-12">
                     <div className="card shadow-sm">
                         <div className="card-body">
-                            <div className="fw-semibold mb-2">My Listings</div>
+                            <div className="fw-semibold mb-2">{isAgent ? 'My Profiles' : 'My Listings'}</div>
                             <div className="row g-3">
                                 {listings.map(it => (
                                     <div className="col-md-4" key={it._id}>
@@ -155,7 +165,7 @@ export default function Dashboard() {
                             <div className="fw-semibold mb-2">Purchase Advertising</div>
                             <div className="row g-2 align-items-end">
                                 <div className="col-md-3">
-                                    <label className="form-label">Listing</label>
+                                    <label className="form-label">{isAgent ? 'Profile' : 'Listing'}</label>
                                     <select className="form-select" value={ad.listingId} onChange={(e)=>setAd({ ...ad, listingId: e.target.value })}>
                                         <option value="">Select listing</option>
                                         {listings.map(l => <option key={l._id} value={l._id}>{l.title}</option>)}

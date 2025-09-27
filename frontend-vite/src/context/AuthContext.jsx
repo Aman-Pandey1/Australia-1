@@ -20,10 +20,16 @@ export function AuthProvider({ children }) {
 					setToken(storedToken)
 					setUser(JSON.parse(storedUser))
 				}
-				// Also try to hydrate from cookie-based session if present
-				if (!storedUser) {
+				// Also try to hydrate from cookie-based session if present or when stored user is missing fields
+				let needsRefresh = true
+				try {
+					const u = storedUser ? JSON.parse(storedUser) : null
+					needsRefresh = !u || !u.accountType
+				} catch { needsRefresh = true }
+				if (needsRefresh) {
 					const { data } = await api.get('/auth/me')
 					if (data?.user) {
+						localStorage.setItem('user', JSON.stringify(data.user))
 						setUser(data.user)
 					}
 				}
