@@ -2,11 +2,24 @@ import { validationResult } from 'express-validator';
 import dayjs from 'dayjs';
 import { Listing } from '../models/Listing.js';
 import { Subscription } from '../models/Subscription.js';
+import User from '../models/User.js';
 import { env } from '../config/env.js';
 
 export async function createListing(req, res) {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
+  // Only agents and admins can create listings
+  try {
+    const actor = await User.findById(req.user.id).select('role accountType');
+    const isAdmin = actor?.role === 'admin';
+    const isAgent = actor?.accountType === 'agent';
+    if (!isAdmin && !isAgent) {
+      return res.status(403).json({ message: 'Only agents can create listings' });
+    }
+  } catch (_e) {
+    return res.status(403).json({ message: 'Forbidden' });
+  }
 
   // Parse optional nested JSON strings coming from multipart/form-data
   let contact = req.body.contact;
