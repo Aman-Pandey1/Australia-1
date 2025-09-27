@@ -20,10 +20,16 @@ export function AuthProvider({ children }) {
 					setToken(storedToken)
 					setUser(JSON.parse(storedUser))
 				}
-				// Also try to hydrate from cookie-based session if present
-				if (!storedUser) {
+				// Also try to hydrate from cookie-based session if present or when stored user is missing fields
+				let needsRefresh = true
+				try {
+					const u = storedUser ? JSON.parse(storedUser) : null
+					needsRefresh = !u || !u.accountType
+				} catch { needsRefresh = true }
+				if (needsRefresh) {
 					const { data } = await api.get('/auth/me')
 					if (data?.user) {
+						localStorage.setItem('user', JSON.stringify(data.user))
 						setUser(data.user)
 					}
 				}
@@ -47,31 +53,33 @@ export function AuthProvider({ children }) {
 
     async function login(email, password) {
         try {
-            const { data } = await api.post('/auth/login', { email, password })
-            // Some backends return token+user, others only set cookie
-            if (data?.token) {
-                localStorage.setItem('token', data.token)
-                setToken(data.token)
-            }
-            if (data?.user) {
-                localStorage.setItem('user', JSON.stringify(data.user))
-                setUser(data.user)
-            } else {
-                try {
-                    const me = await api.get('/auth/me')
-                    if (me.data?.user) {
-                        localStorage.setItem('user', JSON.stringify(me.data.user))
-                        setUser(me.data.user)
-                    }
-                } catch {}
-            }
-            toast.success('Logged in')
-            const role = ((data?.user?.role) || 'user').toLowerCase()
-            if (role === 'admin') {
-                navigate('/admin')
-            } else {
-                navigate('/')
-            }
+			const { data } = await api.post('/auth/login', { email, password })
+			// Some backends return token+user, others only set cookie
+			if (data?.token) {
+				localStorage.setItem('token', data.token)
+				setToken(data.token)
+			}
+			if (data?.user) {
+				localStorage.setItem('user', JSON.stringify(data.user))
+				setUser(data.user)
+			}
+			// Ensure we have freshest user with accountType
+			let effectiveUser = data?.user || null
+			try {
+				const me = await api.get('/auth/me')
+				if (me.data?.user) {
+					effectiveUser = me.data.user
+					localStorage.setItem('user', JSON.stringify(effectiveUser))
+					setUser(effectiveUser)
+				}
+			} catch {}
+			toast.success('Logged in')
+			const role = ((effectiveUser?.role) || 'user').toLowerCase()
+			if (role === 'admin') {
+				navigate('/admin')
+			} else {
+				navigate('/dashboard')
+			}
         } catch (err) {
             const msg = err?.response?.data?.message || err?.response?.data?.errors?.[0]?.msg || 'Login failed'
             toast.error(msg)
@@ -79,27 +87,36 @@ export function AuthProvider({ children }) {
         }
     }
 
-    async function register(payload) {
+	async function register(payload) {
         try {
-            const { data } = await api.post('/auth/register', payload)
-            if (data?.token) {
-                localStorage.setItem('token', data.token)
-                setToken(data.token)
-            }
-            if (data?.user) {
-                localStorage.setItem('user', JSON.stringify(data.user))
-                setUser(data.user)
-            } else {
-                try {
-                    const me = await api.get('/auth/me')
-                    if (me.data?.user) {
-                        localStorage.setItem('user', JSON.stringify(me.data.user))
-                        setUser(me.data.user)
-                    }
-                } catch {}
-            }
-            toast.success('Account created')
-            navigate('/')
+			const { data } = await api.post('/auth/register', payload)
+			if (data?.token) {
+				localStorage.setItem('token', data.token)
+				setToken(data.token)
+			}
+			if (data?.user) {
+				localStorage.setItem('user', JSON.stringify(data.user))
+				setUser(data.user)
+			}
+			// Ensure freshest user and accountType
+			let effectiveUser = data?.user || null
+			if (!effectiveUser || !effectiveUser.accountType) {
+				try {
+					const me = await api.get('/auth/me')
+					if (me.data?.user) {
+						effectiveUser = me.data.user
+						localStorage.setItem('user', JSON.stringify(effectiveUser))
+						setUser(effectiveUser)
+					}
+				} catch {}
+			}
+			toast.success('Account created')
+			const role = ((effectiveUser?.role) || 'user').toLowerCase()
+			if (role === 'admin') {
+				navigate('/admin')
+			} else {
+				navigate('/dashboard')
+			}
         } catch (err) {
             const msg = err?.response?.data?.message || err?.response?.data?.errors?.[0]?.msg || 'Registration failed'
             toast.error(msg)
@@ -107,7 +124,8 @@ export function AuthProvider({ children }) {
         }
     }
 
-	function logout() {
+	async function logout() {
+		try { await api.post('/auth/logout') } catch {}
 		localStorage.removeItem('token')
 		localStorage.removeItem('user')
 		setToken(null)

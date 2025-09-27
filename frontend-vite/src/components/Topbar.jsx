@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext'
 
 export default function Topbar() {
     const { theme, toggleTheme } = useTheme()
-    const { user } = useAuth()
+    const { user, logout } = useAuth()
     return (
         <div className="topbar">
             <div className="container d-flex align-items-center justify-content-between py-1">
@@ -26,7 +26,8 @@ export default function Topbar() {
                     </div>
                     {!user && <Link to="/login" className="link-light text-decoration-none">Login</Link>}
                     {!user && <Link to="/register" className="btn btn-sm btn-primary">Add advertisement</Link>}
-                    {user && <Link to="/dashboard" className="btn btn-sm btn-primary">My account</Link>}
+                    {user && <Link to="/dashboard" className="btn btn-sm btn-outline-light">My account</Link>}
+                    {user && <button onClick={logout} className="btn btn-sm btn-primary">Logout</button>}
                 </div>
             </div>
         </div>
