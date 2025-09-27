@@ -7,6 +7,7 @@ export default function Dashboard() {
     const { user, token } = useAuth()
     const navigate = useNavigate()
     const isAgent = (user?.accountType === 'agent')
+    const isNormalUser = !isAgent && user?.role !== 'admin'
     const [subs, setSubs] = useState({ subscription: null, remainingDays: 0 })
     const [listings, setListings] = useState([])
     const [newListing, setNewListing] = useState({ title: '', description: '', price: '', contact: { city: '', address: '', phone: '' }, stats: { age: '' } })
@@ -73,10 +74,12 @@ export default function Dashboard() {
                     </div>
                 </div>
 
+                {isAgent && (
                 <div className="col-md-6">
                     <div className="card shadow-sm h-100">
                         <div className="card-body">
-                            <div className="fw-semibold mb-2">{isAgent ? 'Add Profile' : 'Add Listing'}</div>
+                            <div className="fw-semibold mb-2">Add Profile</div>
+                            <div className="alert alert-warning py-2 small">Select a subscription plan for this profile to be visible.</div>
                             <div className="mb-2">
                                 <label className="form-label">Title</label>
                                 <input className="form-control" value={newListing.title} onChange={(e)=>setNewListing({ ...newListing, title: e.target.value })} />
@@ -118,7 +121,25 @@ export default function Dashboard() {
                                     </div>
                                 )}
                             </div>
-                            <button className="btn btn-success btn-sm" onClick={async ()=>{
+                            {/* Plan selection per listing */}
+                            <div className="row g-2 align-items-end">
+                                <div className="col-md-4">
+                                    <label className="form-label">Plan</label>
+                                    <select className="form-select" value={newListing.planType||''} onChange={(e)=>setNewListing({ ...newListing, planType: e.target.value })}>
+                                        <option value="">Free (no boost)</option>
+                                        <option value="featured">Featured (city)</option>
+                                        <option value="premium">Premium (multi-city)</option>
+                                        <option value="vip">Diamond (homepage)</option>
+                                    </select>
+                                </div>
+                                {(newListing.planType==='featured' || newListing.planType==='premium') && (
+                                    <div className="col-md-8">
+                                        <label className="form-label">Cities (comma separated)</label>
+                                        <input className="form-control" placeholder="Sydney, Melbourne" value={newListing.planCities||''} onChange={(e)=>setNewListing({ ...newListing, planCities: e.target.value })} />
+                                    </div>
+                                )}
+                            </div>
+                            <button className="btn btn-success btn-sm mt-2" onClick={async ()=>{
                                 if(!newListing.title) return
                                 const form = new FormData()
                                 form.append('title', newListing.title)
@@ -126,22 +147,25 @@ export default function Dashboard() {
                                 form.append('contact', JSON.stringify(newListing.contact))
                                 form.append('stats', JSON.stringify({ ...newListing.stats, age: newListing.stats.age || '' }))
                                 if (newListing.price !== '') form.append('price', String(newListing.price))
+                                if (newListing.planType) form.append('planType', newListing.planType)
+                                if (newListing.planCities) form.append('planCities', newListing.planCities)
                                 images.forEach((f) => form.append('images', f))
                                 await api.post('/listings', form, { headers: { 'Content-Type': 'multipart/form-data' } })
                                 setNewListing({ title: '', description: '', price: '', contact: { city: '', address: '', phone: '' }, stats: { age: '' } })
                                 setImages([])
                                 refresh()
-                            }}>{isAgent ? 'Submit profile' : 'Submit for approval'}</button>
+                            }}>Submit profile</button>
                         </div>
                     </div>
                 </div>
+                )}
 
                 <div className="col-12">
                     <div className="card shadow-sm">
                         <div className="card-body">
-                            <div className="fw-semibold mb-2">{isAgent ? 'My Profiles' : 'My Listings'}</div>
+                            <div className="fw-semibold mb-2">{isAgent ? 'My Profiles' : 'My Profile'}</div>
                             <div className="row g-3">
-                                {listings.map(it => (
+                                {(isAgent ? listings : listings.slice(0,1)).map(it => (
                                     <div className="col-md-4" key={it._id}>
                                         <div className="border rounded p-3 h-100">
                                             <div className="d-flex justify-content-between align-items-center mb-1">
@@ -159,6 +183,7 @@ export default function Dashboard() {
                     </div>
                 </div>
 
+                {isAgent && (
                 <div className="col-12">
                     <div className="card shadow-sm">
                         <div className="card-body">
@@ -205,6 +230,7 @@ export default function Dashboard() {
                         </div>
                     </div>
                 </div>
+                )}
             </div>
         </div>
     )

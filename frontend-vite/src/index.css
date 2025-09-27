@@ -2,24 +2,24 @@
 
 /* Theme variables */
 :root[data-theme="dark"], :root:not([data-theme]) {
-  --color-bg: #0b0c0f;
-  --color-panel: #111318;
-  --color-surface: #161a22;
-  --color-border: #222633;
-  --color-text: #e6e8ee;
-  --color-muted: #a7adbb;
-  --color-primary: #ff2e63; /* accent pink */
+  --color-bg: #0b0b0b; /* near-black */
+  --color-panel: #121212;
+  --color-surface: #161616;
+  --color-border: #262626;
+  --color-text: #f2f2f2;
+  --color-muted: #b4b4b4;
+  --color-primary: #e50914; /* Netflix red */
   --color-gold: #f7b500;
 }
 
 :root[data-theme="light"] {
-  --color-bg: #f7f7fb;
+  --color-bg: #fafafa;
   --color-panel: #ffffff;
   --color-surface: #ffffff;
-  --color-border: #e5e7ef;
-  --color-text: #0b0c0f;
-  --color-muted: #5b6170;
-  --color-primary: #e91e63;
+  --color-border: #e5e5e5;
+  --color-text: #111111;
+  --color-muted: #666666;
+  --color-primary: #d90429; /* red */
   --color-gold: #cf9d00;
 }
 
@@ -42,17 +42,17 @@ body {
 .card .card-body { color: var(--color-text); }
 
 /* Navbar dark */
-.navbar-dark { background: #0e1015 !important; border-bottom: 1px solid var(--color-border); }
+.navbar-dark { background: #0a0a0a !important; border-bottom: 1px solid var(--color-border); }
 .navbar-dark .navbar-brand, .navbar-dark .nav-link { color: var(--color-text) !important; }
 .navbar-dark .nav-link.active { color: var(--color-primary) !important; }
 .navbar-dark.navbar-blur { background: rgba(14,16,21,.7) !important; backdrop-filter: saturate(180%) blur(10px); }
 .navbar .dropdown-menu { border-radius: 10px; overflow: hidden; }
-.dropdown-menu-dark { background: #151923; border: 1px solid #222636; }
+.dropdown-menu-dark { background: #161616; border: 1px solid #262626; }
 .dropdown-menu-dark .dropdown-item { color: #cbd1df; }
 .dropdown-menu-dark .dropdown-item:hover { background: #1b2030; color: #fff; }
 
 /* Topbar */
-.topbar { background: #0a0b0f; border-bottom: 1px solid var(--color-border); }
+.topbar { background: #0a0a0a; border-bottom: 1px solid var(--color-border); }
 .topbar [data-theme="light"] & { background: #ffffff; }
 .topbar .btn-primary { padding: 2px 10px; }
 
@@ -75,7 +75,7 @@ body {
 .bg-cover { background-size: cover; background-position: center; }
 
 /* Footer */
-footer.footer { background: #0a0c10; border-top: 1px solid var(--color-border); color: var(--color-muted); }
+footer.footer { background: #0a0a0a; border-top: 1px solid var(--color-border); color: var(--color-muted); }
 
 /* Scroll row (carousel-like) */
 .scroll-row { display: grid; grid-auto-flow: column; grid-auto-columns: 240px; gap: 14px; overflow-x: auto; padding-bottom: 6px; }

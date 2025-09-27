@@ -20,7 +20,7 @@ export async function register(req, res) {
   const user = await User.create({ email, passwordHash, name, accountType: ['user','agent'].includes(accountType) ? accountType : 'user', role: email === env.adminEmail ? 'admin' : 'user' });
   const token = signToken(user);
   res.cookie('token', token, { httpOnly: true, sameSite: 'lax' });
-  return res.json({ user: { id: user._id, email: user.email, name: user.name, role: user.role }, token });
+  return res.json({ user: { id: user._id, email: user.email, name: user.name, role: user.role, accountType: user.accountType, avatarUrl: user.avatarUrl }, token });
 }
 
 export async function login(req, res) {
@@ -33,7 +33,7 @@ export async function login(req, res) {
   if (!ok) return res.status(401).json({ message: 'Invalid credentials' });
   const token = signToken(user);
   res.cookie('token', token, { httpOnly: true, sameSite: 'lax' });
-  return res.json({ user: { id: user._id, email: user.email, name: user.name, role: user.role }, token });
+  return res.json({ user: { id: user._id, email: user.email, name: user.name, role: user.role, accountType: user.accountType, avatarUrl: user.avatarUrl }, token });
 }
 
 export async function me(req, res) {
@@ -55,6 +55,6 @@ export async function updateProfile(req, res) {
     user.avatarUrl = `${env.publicUrl.replace(/\/$/, '')}/uploads/${req.file.filename}`;
   }
   await user.save();
-  return res.json({ user: { id: user._id, email: user.email, name: user.name, role: user.role, avatarUrl: user.avatarUrl } });
+  return res.json({ user: { id: user._id, email: user.email, name: user.name, role: user.role, accountType: user.accountType, avatarUrl: user.avatarUrl } });
 }
 

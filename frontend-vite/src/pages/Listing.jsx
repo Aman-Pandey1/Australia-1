@@ -110,8 +110,14 @@ export default function Listing() {
     return (
         <div className="container py-4">
             <nav className="mb-3"><Link to="/">Home</Link> / <span>{listing.title}</span></nav>
-            <h1 className="h3 mb-1 text-uppercase">{listing.title}</h1>
-            <div className="text-secondary mb-3">{listing.contact?.city || ''}</div>
+            <div className="d-flex align-items-center justify-content-between">
+                <h1 className="h3 mb-1 text-uppercase">{listing.title}</h1>
+                {listing?.premium?.level === 'vip' && <span className="badge badge-vip">DIAMOND</span>}
+            </div>
+            <div className="text-secondary mb-3">
+                <i className="bi bi-geo-alt me-1 text-danger" />{listing.contact?.city || ''}
+                {typeof listing.price === 'number' && <span className="ms-3 pill-icon pill-premium">${listing.price}/hr</span>}
+            </div>
 
             <div className="row g-3">
                 {/* Left: gallery + description + services + reviews/comments */}
@@ -136,7 +142,7 @@ export default function Listing() {
 
                     {/* About me */}
                     {listing.description && (
-                        <div className="card mb-3 shadow-sm">
+                        <div className="card mb-3 shadow-sm" style={{ borderColor: 'rgba(229,9,20,.25)' }}>
                             <div className="card-body">
                                 <div className="fw-semibold mb-2">About me</div>
                                 <div dangerouslySetInnerHTML={{ __html: nl2br(escapeHtml(listing.description)) }} />
@@ -146,12 +152,12 @@ export default function Listing() {
 
                     {/* Services (use categories as a proxy) */}
                     {Array.isArray(listing.categories) && listing.categories.length > 0 && (
-                        <div className="card mb-3 shadow-sm">
+                        <div className="card mb-3 shadow-sm" style={{ borderColor: 'rgba(229,9,20,.25)' }}>
                             <div className="card-body">
                                 <div className="fw-semibold mb-2">Services</div>
                                 <div className="d-flex flex-wrap gap-2">
                                     {listing.categories.map((c) => (
-                                        <span key={c} className="badge bg-secondary-subtle border text-secondary">{c}</span>
+                                        <span key={c} className="badge" style={{ background:'#1a1a1a', border:'1px solid #262626', color:'#f2f2f2' }}>{c}</span>
                                     ))}
                                 </div>
                             </div>
@@ -216,7 +222,7 @@ export default function Listing() {
 
                 {/* Right: info, contact, rates, availability, report */}
                 <div className="col-lg-4">
-                    <div className="card mb-3 shadow-sm">
+                    <div className="card mb-3 shadow-sm" style={{ borderColor: 'rgba(229,9,20,.25)' }}>
                         <div className="card-body">
                             <div className="d-flex justify-content-between align-items-center mb-2">
                                 <div className="fw-semibold">Info</div>
@@ -235,10 +241,11 @@ export default function Listing() {
                         </div>
                     </div>
 
-                    <div className="card mb-3 shadow-sm">
+                    <div className="card mb-3 shadow-sm" style={{ borderColor: 'rgba(229,9,20,.25)' }}>
                         <div className="card-body">
                             <div className="fw-semibold mb-2">Contact</div>
                             <div className="mb-1"><span className="text-muted small d-block">City</span><span className="fw-semibold">{listing?.contact?.city || '-'}</span></div>
+                            {listing?.contact?.address && <div className="mb-1"><span className="text-muted small d-block">Address</span><span className="fw-semibold">{listing.contact.address}</span></div>}
                             <div className="mb-1"><span className="text-muted small d-block">Country</span><span className="fw-semibold">{listing?.contact?.country || '-'}</span></div>
                             {listing?.contact?.phone && <div className="mb-1"><span className="text-muted small d-block">Phone</span><span className="fw-semibold">{listing.contact.phone}</span></div>}
                             {listing?.contact?.whatsapp && <div className="mb-1"><span className="text-muted small d-block">WhatsApp</span><span className="fw-semibold">{listing.contact.whatsapp}</span></div>}
@@ -281,7 +288,7 @@ export default function Listing() {
                         </div>
                     )}
 
-                    <div className="card mb-3 shadow-sm">
+                    <div className="card mb-3 shadow-sm" style={{ borderColor: 'rgba(229,9,20,.25)' }}>
                         <div className="card-body">
                             <div className="fw-semibold mb-2">Report</div>
                             <form onSubmit={submitReport}>

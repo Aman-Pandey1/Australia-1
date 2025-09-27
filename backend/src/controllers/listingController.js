@@ -17,6 +17,19 @@ export async function createListing(req, res) {
     if (!isAdmin && !isAgent) {
       return res.status(403).json({ message: 'Only agents can create listings' });
     }
+    // Enforce per-listing plan selection for agents
+    if (isAgent && !isAdmin) {
+      // Require plan selection per listing for agents
+      const planType = String(req.body.planType || '').toLowerCase();
+      if (!['vip', 'premium', 'featured'].includes(planType)) {
+        return res.status(400).json({ message: 'Plan selection required (vip, premium, or featured)' });
+      }
+      const now = dayjs();
+      const activeSub = await Subscription.findOne({ user: req.user.id, status: 'active', expiresAt: { $gt: now.toDate() } });
+      if (!activeSub) {
+        return res.status(402).json({ message: 'Active subscription required for selected plan' });
+      }
+    }
   } catch (_e) {
     return res.status(403).json({ message: 'Forbidden' });
   }
@@ -47,6 +60,21 @@ export async function createListing(req, res) {
     price,
     status: env.autoApproveListings ? 'approved' : 'pending',
   };
+  // Apply optional premium plan at creation time when agent selected and subscription allows
+  const planType = String(req.body.planType || '').toLowerCase();
+  if (['vip','premium','featured'].includes(planType)) {
+    payload.premium = payload.premium || {};
+    payload.premium.level = planType;
+    if (planType === 'vip') payload.premium.showOnHomepage = true;
+    const citiesStr = req.body.planCities || '';
+    if (citiesStr) {
+      const cityArr = String(citiesStr).split(',').map((s)=>s.trim()).filter(Boolean);
+      if (cityArr.length) payload.premium.cities = cityArr;
+    }
+    const now = dayjs();
+    payload.premium.startsAt = now.toDate();
+    payload.premium.expiresAt = now.add(30, 'day').toDate();
+  }
   const listing = await Listing.create(payload);
   return res.status(201).json({ listing });
 }

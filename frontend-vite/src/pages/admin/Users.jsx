@@ -23,6 +23,10 @@ export default function AdminUsers() {
         await api.patch(`/admin/users/${userId}/role`, { role })
         await refresh()
     }
+    async function setAccountType(userId, accountType) {
+        await api.patch(`/admin/users/${userId}/account-type`, { accountType })
+        await refresh()
+    }
 
     const countByRole = useMemo(() => users.reduce((acc, u) => { acc[u.role] = (acc[u.role]||0)+1; return acc }, {}), [users])
 
@@ -46,12 +50,13 @@ export default function AdminUsers() {
                     <div className="table-responsive">
                         <table className="table table-striped table-hover align-middle mb-0">
                             <thead>
-                                <tr>
-                                    <th>Email</th>
-                                    <th>Name</th>
-                                    <th>Role</th>
-                                    <th></th>
-                                </tr>
+                            <tr>
+                                <th>Email</th>
+                                <th>Name</th>
+                                <th>Role</th>
+                                <th>Account type</th>
+                                <th></th>
+                            </tr>
                             </thead>
                             <tbody>
                                 {users.map(u => (
@@ -59,6 +64,12 @@ export default function AdminUsers() {
                                         <td>{u.email}</td>
                                         <td>{u.name || '-'}</td>
                                         <td><span className="badge text-bg-secondary text-uppercase">{u.role}</span></td>
+                                        <td>
+                                            <div className="d-inline-flex gap-2 align-items-center">
+                                                <span className="badge text-bg-dark">{u.accountType || 'user'}</span>
+                                                <button className="btn btn-sm btn-outline-secondary" onClick={() => setAccountType(u._id, u.accountType === 'agent' ? 'user' : 'agent')}>{u.accountType === 'agent' ? 'Make user' : 'Make agent'}</button>
+                                            </div>
+                                        </td>
                                         <td className="text-end">
                                             {u.role !== 'admin' ? (
                                                 <button className="btn btn-sm btn-outline-primary" onClick={() => setRole(u._id, 'admin')}>Make admin</button>

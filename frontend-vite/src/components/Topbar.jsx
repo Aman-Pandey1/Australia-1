@@ -26,6 +26,7 @@ export default function Topbar() {
                     </div>
                     {!user && <Link to="/login" className="link-light text-decoration-none">Login</Link>}
                     {!user && <Link to="/register" className="btn btn-sm btn-primary">Add advertisement</Link>}
+                    {user && user.accountType === 'agent' && <Link to="/dashboard" className="btn btn-sm btn-primary">Add advertisement</Link>}
                     {user && <Link to="/dashboard" className="btn btn-sm btn-outline-light">My account</Link>}
                     {user && <button onClick={logout} className="btn btn-sm btn-primary">Logout</button>}
                 </div>

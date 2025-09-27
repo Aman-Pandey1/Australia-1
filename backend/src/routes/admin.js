@@ -5,6 +5,7 @@ import {
 	// users
 	listUsers,
 	setUserRole,
+	setUserAccountType,
 	// listings
 	listListings,
 	setListingStatus,
@@ -46,6 +47,7 @@ router.get('/summary', dashboardSummary);
 // Users
 router.get('/users', listUsers);
 router.patch('/users/:id/role', setUserRole);
+router.patch('/users/:id/account-type', setUserAccountType);
 
 // Listings
 router.get('/listings', listListings);

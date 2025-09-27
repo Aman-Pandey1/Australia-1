@@ -56,6 +56,10 @@ export default function Admin() {
         await api.patch(`/admin/users/${userId}/role`, { role })
         await refreshUsers()
     }
+    async function setAccountType(userId, accountType) {
+        await api.patch(`/admin/users/${userId}/account-type`, { accountType })
+        await refreshUsers()
+    }
 	return (
 		<AdminLayout title="Dashboard">
 			{!stats ? (
@@ -151,6 +155,7 @@ export default function Admin() {
                                 <th>Email</th>
                                 <th>Name</th>
                                 <th>Role</th>
+                                <th>Account type</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -160,6 +165,12 @@ export default function Admin() {
                                     <td>{u.email}</td>
                                     <td>{u.name || '-'}</td>
                                     <td><span className="badge text-bg-secondary">{u.role}</span></td>
+                                    <td>
+                                        <div className="d-inline-flex gap-2 align-items-center">
+                                            <span className="badge text-bg-dark">{u.accountType || 'user'}</span>
+                                            <button className="btn btn-sm btn-outline-secondary" onClick={() => setAccountType(u._id, u.accountType === 'agent' ? 'user' : 'agent')}>{u.accountType === 'agent' ? 'Make user' : 'Make agent'}</button>
+                                        </div>
+                                    </td>
                                     <td className="text-end">
                                         {u.role !== 'admin' ? (
                                             <button className="btn btn-sm btn-outline-primary" onClick={() => setRole(u._id, 'admin')}>Make admin</button>
