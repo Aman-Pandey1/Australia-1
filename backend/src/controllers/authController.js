@@ -49,12 +49,24 @@ export async function logout(_req, res) {
 export async function updateProfile(req, res) {
   const user = await User.findById(req.user.id);
   if (!user) return res.status(404).json({ message: 'Not found' });
-  const { name } = req.body;
-  if (name !== undefined) user.name = name;
+
+  // Accept JSON or multipart
+  const body = { ...req.body };
+  if (typeof body.age === 'string' && body.age !== '') body.age = Number(body.age);
+  if (typeof body.price === 'string' && body.price !== '') body.price = Number(body.price);
+
+  if (body.name !== undefined) user.name = body.name;
+  if (body.age !== undefined) user.age = body.age;
+  if (body.price !== undefined) user.price = body.price;
+  if (body.phone !== undefined) user.phone = body.phone;
+  if (body.bio !== undefined) user.bio = body.bio;
+  if (body.avatarUrl !== undefined) user.avatarUrl = body.avatarUrl;
+
   if (req.file) {
     user.avatarUrl = `${env.publicUrl.replace(/\/$/, '')}/uploads/${req.file.filename}`;
   }
+
   await user.save();
-  return res.json({ user: { id: user._id, email: user.email, name: user.name, role: user.role, accountType: user.accountType, avatarUrl: user.avatarUrl } });
+  return res.json({ user: { id: user._id, email: user.email, name: user.name, role: user.role, accountType: user.accountType, avatarUrl: user.avatarUrl, age: user.age, price: user.price, phone: user.phone, bio: user.bio } });
 }
 

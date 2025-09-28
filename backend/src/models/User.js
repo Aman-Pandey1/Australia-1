@@ -12,6 +12,11 @@ const userSchema = new mongoose.Schema(
     avatarUrl: { type: String },
     cities: [{ type: String }],
     isPremium: { type: Boolean, default: false },
+    // Extended public profile fields
+    age: { type: Number },
+    price: { type: Number, min: 0 },
+    phone: { type: String },
+    bio: { type: String },
   },
   { timestamps: true }
 );
