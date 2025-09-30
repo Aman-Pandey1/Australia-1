@@ -1,14 +1,13 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
 const CommentSchema = new mongoose.Schema(
-	{
-		listing: { type: mongoose.Schema.Types.ObjectId, ref: 'Listing', index: true },
-		author: { type: mongoose.Schema.Types.ObjectId, ref: 'User', index: true },
-		content: { type: String, required: true },
-		status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending', index: true },
-	},
-	{ timestamps: true }
+  {
+    listing: { type: mongoose.Schema.Types.ObjectId, ref: 'Listing', required: true, index: true },
+    author: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+    content: { type: String, required: true },
+    isDeleted: { type: Boolean, default: false },
+  },
+  { timestamps: true }
 );
 
-export const Comment = mongoose.model('Comment', CommentSchema);
-
+module.exports = mongoose.model('Comment', CommentSchema);
