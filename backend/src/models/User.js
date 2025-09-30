@@ -1,35 +1,22 @@
-import mongoose from 'mongoose';
-import bcrypt from 'bcryptjs';
+const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 
-const userSchema = new mongoose.Schema(
+const UserSchema = new mongoose.Schema(
   {
-    name: { type: String, trim: true },
-    email: { type: String, required: true, unique: true, lowercase: true },
+    email: { type: String, required: true, unique: true, index: true },
     passwordHash: { type: String, required: true },
-    role: { type: String, enum: ['user', 'admin'], default: 'user' },
-    // Distinguish between a normal end-user and an agent who can manage multiple escorts
-    accountType: { type: String, enum: ['user', 'agent'], default: 'user', index: true },
-    avatarUrl: { type: String },
-    cities: [{ type: String }],
-    isPremium: { type: Boolean, default: false },
-    // Extended public profile fields
-    age: { type: Number },
-    price: { type: Number, min: 0 },
-    phone: { type: String },
-    bio: { type: String },
+    name: { type: String, required: true },
+    role: { type: String, enum: ['admin', 'provider', 'user'], default: 'user', index: true },
+    isEmailVerified: { type: Boolean, default: false },
+    subscription: { type: mongoose.Schema.Types.ObjectId, ref: 'Subscription', default: null },
+    favoritesCount: { type: Number, default: 0 },
   },
   { timestamps: true }
 );
 
-userSchema.statics.hashPassword = async function hashPassword(password) {
-  const salt = await bcrypt.genSalt(10);
-  return bcrypt.hash(password, salt);
+UserSchema.methods.comparePassword = async function comparePassword(plain) {
+  return bcrypt.compare(plain, this.passwordHash);
 };
 
-userSchema.methods.comparePassword = async function comparePassword(password) {
-  return bcrypt.compare(password, this.passwordHash);
-};
-
-export const User = mongoose.model('User', userSchema);
-export default User;
+module.exports = mongoose.model('User', UserSchema);
 

@@ -1,39 +1,47 @@
-import mongoose from 'mongoose';
-import slugify from 'slugify';
+const mongoose = require('mongoose');
 
-const ContactSchema = new mongoose.Schema(
+const ContactInfoSchema = new mongoose.Schema(
   {
     city: { type: String, index: true },
     country: { type: String, index: true },
-    address: { type: String },
     phone: String,
-    whatsapp: String,
-    telegram: String,
+    apps: [{ type: String }], // WhatsApp, Telegram, etc
+    website: String,
   },
   { _id: false }
 );
 
-const StatsSchema = new mongoose.Schema(
+const ProfileSchema = new mongoose.Schema(
   {
-    gender: { type: String, enum: ['female', 'male', 'trans', 'other'] },
+    gender: { type: String, enum: ['Female', 'Male', 'Transgender', 'Non-binary', 'Other'], index: true },
+    sexualOrientation: String,
     age: Number,
-    height: String,
-    weight: String,
-    measurements: String,
-    ethnicity: String,
-    hair: String,
+    location: String,
     eyes: String,
+    hair: String,
+    breasts: String,
+    pubicHair: String,
+    outcall: String,
+    languages: [{ type: String }],
+    ethnicity: String,
+    nationality: String,
+    heightCm: Number,
+    weightKg: Number,
+    smoking: String,
+    drinking: String,
+    tattoos: String,
+    piercings: String,
+    meetingWith: String,
+    availableForCouples: { type: Boolean, default: false },
   },
   { _id: false }
 );
 
-const PremiumSchema = new mongoose.Schema(
+const AdvertisingSchema = new mongoose.Schema(
   {
-    level: { type: String, enum: ['none', 'featured', 'vip', 'premium'], default: 'none', index: true },
-    startsAt: Date,
-    expiresAt: Date,
-    cities: [{ type: String, index: true }],
-    showOnHomepage: { type: Boolean, default: false },
+    premiumCity: { type: String, default: null },
+    premiumMultiCities: [{ type: String }],
+    homepageVip: { type: Boolean, default: false },
   },
   { _id: false }
 );
@@ -42,27 +50,18 @@ const ListingSchema = new mongoose.Schema(
   {
     owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
     title: { type: String, required: true },
-    slug: { type: String, unique: true, index: true },
     description: { type: String, default: '' },
-    photos: [{ type: String }],
-    price: { type: Number, min: 0 },
-    categories: [{ type: String, index: true }],
-    contact: ContactSchema,
-    stats: StatsSchema,
-    premium: PremiumSchema,
-    views: { type: Number, default: 0, index: true },
+    contact: { type: ContactInfoSchema, default: {} },
+    profile: { type: ProfileSchema, default: {} },
     status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending', index: true },
+    isDeleted: { type: Boolean, default: false },
+    photos: [{ type: String }],
+    views: { type: Number, default: 0 },
+    favoritesCount: { type: Number, default: 0 },
+    advertising: { type: AdvertisingSchema, default: {} },
   },
   { timestamps: true }
 );
 
-ListingSchema.pre('save', function preSave(next) {
-  if (this.isModified('title') || !this.slug) {
-    this.slug = slugify(this.title, { lower: true, strict: true });
-  }
-  next();
-});
-
-export const Listing = mongoose.model('Listing', ListingSchema);
-export default Listing;
+module.exports = mongoose.model('Listing', ListingSchema);
 
