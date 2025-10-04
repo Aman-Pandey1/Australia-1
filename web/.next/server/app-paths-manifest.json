@@ -1,0 +1,13 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/account/listings/page": "app/account/listings/page.js",
+  "/(auth)/login/page": "app/(auth)/login/page.js",
+  "/(auth)/register/page": "app/(auth)/register/page.js",
+  "/account/listings/new/page": "app/account/listings/new/page.js",
+  "/account/page": "app/account/page.js",
+  "/account/profile/page": "app/account/profile/page.js",
+  "/account/subscription/page": "app/account/subscription/page.js",
+  "/admin/page": "app/admin/page.js",
+  "/page": "app/page.js",
+  "/(marketing)/page": "app/(marketing)/page.js"
+}
